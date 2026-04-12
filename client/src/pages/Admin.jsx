@@ -1,24 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { ref, onValue } from 'firebase/database';
-import { LayoutDashboard, Plus, Package, Mail, ListPlus, ArrowLeft, Zap, Lock } from 'lucide-react';
+import { LayoutDashboard, Plus, Package, Mail, ListPlus, ArrowLeft, Zap, Lock, Trash2, ChevronDown, ChevronUp, Key } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 function Admin() {
   const navigate = useNavigate();
   const [products, setProducts] = useState({});
+  const [stock, setStock] = useState({});
   const [emailTemplate, setEmailTemplate] = useState('');
   const [newProduct, setNewProduct] = useState({ name: '', desc: '', image: '' });
   const [newSub, setNewSub] = useState({ productId: '', label: '', price: '' });
   const [bulkStock, setBulkStock] = useState({ subId: '', keys: '' });
   const [auth, setAuth] = useState({ isAuthed: false, password: '' });
+  const [expandedProduct, setExpandedProduct] = useState(null);
+  const [expandedSub, setExpandedSub] = useState(null);
 
   const backendUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
   useEffect(() => {
     onValue(ref(db, 'products'), (snapshot) => {
       setProducts(snapshot.val() || {});
+    });
+    onValue(ref(db, 'stock'), (snapshot) => {
+      setStock(snapshot.val() || {});
     });
     onValue(ref(db, 'settings/emailTemplate'), (snapshot) => {
       setEmailTemplate(snapshot.val() || '');
@@ -34,6 +40,14 @@ function Admin() {
     } catch (err) { alert(err.response?.data?.message || 'Gagal tambah produk'); }
   };
 
+  const deleteProduct = async (productId, productName) => {
+    if (!confirm(`Hapus produk "${productName}"? Semua variasi & stok akan ikut terhapus!`)) return;
+    try {
+      await axios.delete(`${backendUrl}/admin/products/${productId}`, { headers: { 'x-admin-password': auth.password }});
+      alert('Produk berhasil dihapus!');
+    } catch (err) { alert(err.response?.data?.message || 'Gagal hapus produk'); }
+  };
+
   const addSubProduct = async (e) => {
     e.preventDefault();
     if (!newSub.productId) return;
@@ -45,6 +59,22 @@ function Admin() {
       setNewSub({ productId: '', label: '', price: '' });
       alert('Variasi berhasil ditambahkan!');
     } catch (err) { alert(err.response?.data?.message || 'Gagal tambah variasi'); }
+  };
+
+  const deleteSubProduct = async (productId, subId, label) => {
+    if (!confirm(`Hapus variasi "${label}"? Stok key di variasi ini akan ikut terhapus!`)) return;
+    try {
+      await axios.delete(`${backendUrl}/admin/products/${productId}/sub_products/${subId}`, { headers: { 'x-admin-password': auth.password }});
+      alert('Variasi berhasil dihapus!');
+    } catch (err) { alert(err.response?.data?.message || 'Gagal hapus variasi'); }
+  };
+
+  const deleteStockKey = async (subId, keyId, keyValue) => {
+    if (!confirm(`Hapus key "${keyValue}"?`)) return;
+    try {
+      await axios.delete(`${backendUrl}/admin/stock/${subId}/${keyId}`, { headers: { 'x-admin-password': auth.password }});
+      alert('Key berhasil dihapus!');
+    } catch (err) { alert(err.response?.data?.message || 'Gagal hapus key'); }
   };
 
   const addBulkStock = async (e) => {
@@ -97,10 +127,7 @@ function Admin() {
   return (
     <div className="p-4 md:p-8 max-w-6xl mx-auto min-h-screen pt-12 pb-24">
       
-      <button 
-        onClick={() => navigate('/')}
-        className="neo-button mb-8 inline-flex animate-fade-in-up"
-      >
+      <button onClick={() => navigate('/')} className="neo-button mb-8 inline-flex animate-fade-in-up">
         <ArrowLeft size={20} strokeWidth={3} className="mr-2" /> Kembali
       </button>
 
@@ -216,6 +243,104 @@ function Admin() {
               value={emailTemplate} onChange={e => setEmailTemplate(e.target.value)}
             />
             <button onClick={saveEmailTemplate} className="neo-button-primary w-fit">SIMPAN TEMPLATE</button>
+          </div>
+        </section>
+
+        {/* ===== KELOLA / DELETE ===== */}
+        <section className="neo-card flex flex-col gap-6 lg:col-span-2 animate-fade-in-up">
+          <h2 className="text-2xl font-black uppercase flex items-center gap-3 border-b-4 border-neo-dark pb-4">
+            <div className="bg-red-400 border-4 border-neo-dark p-2"><Trash2 size={24} strokeWidth={3}/></div>
+            Kelola & Hapus Data
+          </h2>
+
+          {Object.keys(products).length === 0 && (
+            <p className="font-bold opacity-50 text-center py-4">Belum ada produk.</p>
+          )}
+
+          <div className="flex flex-col gap-4">
+            {Object.entries(products).map(([pid, product]) => (
+              <div key={pid} className="border-4 border-neo-dark shadow-[4px_4px_0px_0px_#1e293b]">
+                
+                {/* Header Produk */}
+                <div className="flex items-center justify-between p-4 bg-white">
+                  <button
+                    onClick={() => setExpandedProduct(expandedProduct === pid ? null : pid)}
+                    className="flex items-center gap-3 font-black uppercase text-lg flex-1 text-left"
+                  >
+                    {expandedProduct === pid ? <ChevronUp size={20} strokeWidth={3}/> : <ChevronDown size={20} strokeWidth={3}/>}
+                    {product.name}
+                    <span className="text-sm font-bold opacity-50 normal-case">
+                      ({Object.keys(product.sub_products || {}).length} variasi)
+                    </span>
+                  </button>
+                  <button
+                    onClick={() => deleteProduct(pid, product.name)}
+                    className="bg-red-400 border-4 border-neo-dark p-2 shadow-[3px_3px_0px_0px_#1e293b] hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_#1e293b] transition-all ml-3"
+                    title="Hapus Produk"
+                  >
+                    <Trash2 size={18} strokeWidth={3}/>
+                  </button>
+                </div>
+
+                {/* Variasi */}
+                {expandedProduct === pid && product.sub_products && (
+                  <div className="border-t-4 border-neo-dark bg-gray-50">
+                    {Object.entries(product.sub_products).map(([sid, sub]) => {
+                      const subStockKeys = stock[sid] ? Object.entries(stock[sid]) : [];
+                      return (
+                        <div key={sid} className="border-b-4 border-neo-dark last:border-b-0">
+                          
+                          {/* Header Variasi */}
+                          <div className="flex items-center justify-between px-6 py-3 bg-gray-100">
+                            <button
+                              onClick={() => setExpandedSub(expandedSub === sid ? null : sid)}
+                              className="flex items-center gap-2 font-black text-base flex-1 text-left"
+                            >
+                              {expandedSub === sid ? <ChevronUp size={16} strokeWidth={3}/> : <ChevronDown size={16} strokeWidth={3}/>}
+                              <span className="bg-neo-green border-2 border-neo-dark px-2 py-0.5 text-sm">{sub.label}</span>
+                              <span className="font-bold">Rp {Number(sub.price).toLocaleString('id-ID')}</span>
+                              <span className="text-sm opacity-50">— {subStockKeys.length} key</span>
+                            </button>
+                            <button
+                              onClick={() => deleteSubProduct(pid, sid, sub.label)}
+                              className="bg-orange-300 border-4 border-neo-dark p-1.5 shadow-[3px_3px_0px_0px_#1e293b] hover:-translate-y-1 transition-all ml-3"
+                              title="Hapus Variasi"
+                            >
+                              <Trash2 size={16} strokeWidth={3}/>
+                            </button>
+                          </div>
+
+                          {/* Stock Keys */}
+                          {expandedSub === sid && (
+                            <div className="px-6 py-4 flex flex-col gap-2">
+                              {subStockKeys.length === 0 ? (
+                                <p className="font-bold opacity-40 text-sm text-center py-2">Stok kosong</p>
+                              ) : (
+                                subStockKeys.map(([keyId, keyVal]) => (
+                                  <div key={keyId} className="flex items-center justify-between bg-white border-2 border-neo-dark px-4 py-2 shadow-[2px_2px_0px_0px_#1e293b]">
+                                    <div className="flex items-center gap-2">
+                                      <Key size={14} strokeWidth={3} className="opacity-40 shrink-0"/>
+                                      <span className="font-mono text-sm font-bold truncate max-w-xs">{keyVal.key || keyVal}</span>
+                                    </div>
+                                    <button
+                                      onClick={() => deleteStockKey(sid, keyId, keyVal.key || keyVal)}
+                                      className="bg-red-300 border-2 border-neo-dark p-1 hover:-translate-y-0.5 transition-all ml-3 shrink-0"
+                                      title="Hapus Key"
+                                    >
+                                      <Trash2 size={14} strokeWidth={3}/>
+                                    </button>
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </section>
 
