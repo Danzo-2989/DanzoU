@@ -23,8 +23,8 @@ function Home() {
     return Object.keys(stock[subId]).length;
   };
 
-  const waNumber = import.meta.env.VITE_WA_NUMBER || '6281234567890';
-  const tgUsername = import.meta.env.VITE_TG_USERNAME || 'username';
+  const waNumber = '6289685410080';
+  const tgUsername = 'DanzoStoreID';
 
   const features = [
     {
