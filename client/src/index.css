@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+@theme {
+  --color-neo-green: #34d399; 
+  --color-neo-dark: #1e293b; 
+  --color-neo-bg: #f8fafc; 
+  
+  --shadow-neo: 6px 6px 0px 0px var(--color-neo-dark);
+  --shadow-neo-heavy: 12px 12px 0px 0px var(--color-neo-dark);
+  --shadow-neo-pressed: 0px 0px 0px 0px var(--color-neo-dark);
+
+  /* Animasi V4 Way */
+  --animation-fade-in-up: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@layer base {
+  body {
+    background-color: var(--color-neo-bg);
+    background-image: radial-gradient(var(--color-neo-dark) 1px, transparent 1px);
+    background-size: 24px 24px;
+    color: var(--color-neo-dark);
+    @apply font-sans antialiased;
+  }
+}
+
+@layer components {
+  .neo-card {
+    @apply bg-white border-4 border-neo-dark shadow-neo p-6 transition-all duration-300 ease-out;
+  }
+  .neo-card:hover {
+    @apply -translate-y-2 shadow-neo-heavy;
+  }
+  
+  .neo-button {
+    @apply flex items-center justify-center gap-2 bg-white border-4 border-neo-dark shadow-neo px-6 py-3 font-black uppercase tracking-wider transition-all duration-200 ease-out cursor-pointer;
+  }
+  .neo-button:hover {
+    @apply -translate-y-1 shadow-[8px_8px_0px_0px_var(--color-neo-dark)];
+  }
+  .neo-button:active {
+    @apply translate-x-[6px] translate-y-[6px] shadow-neo-pressed;
+  }
+  
+  .neo-button-primary {
+    @apply flex items-center justify-center gap-2 bg-neo-green border-4 border-neo-dark shadow-neo px-6 py-3 font-black uppercase tracking-wider transition-all duration-200 ease-out cursor-pointer;
+  }
+  .neo-button-primary:hover {
+    @apply -translate-y-1 shadow-[8px_8px_0px_0px_var(--color-neo-dark)] brightness-110;
+  }
+  .neo-button-primary:active {
+    @apply translate-x-[6px] translate-y-[6px] shadow-neo-pressed brightness-100;
+  }
+
+  .neo-input {
+    @apply bg-white border-4 border-neo-dark p-4 font-medium transition-all duration-200 ease-out;
+  }
+  .neo-input:focus {
+    @apply outline-none -translate-y-1 shadow-neo ring-4 ring-neo-green/30;
+  }
+}
