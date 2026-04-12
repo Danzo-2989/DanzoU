@@ -216,6 +216,48 @@ app.post("/admin/stock/:subId", adminAuth, async (req, res) => {
   }
 });
 
+// --- ENDPOINT: Admin Hapus Produk ---
+app.delete("/admin/products/:id", adminAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Hapus stock semua sub_products dulu
+    const prodSnap = await db.ref(`products/${id}/sub_products`).get();
+    if (prodSnap.exists()) {
+      const subIds = Object.keys(prodSnap.val());
+      for (const subId of subIds) {
+        await db.ref(`stock/${subId}`).remove();
+      }
+    }
+    await db.ref(`products/${id}`).remove();
+    res.json({ success: true, message: "Produk berhasil dihapus" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// --- ENDPOINT: Admin Hapus Sub Produk ---
+app.delete("/admin/products/:productId/sub_products/:subId", adminAuth, async (req, res) => {
+  try {
+    const { productId, subId } = req.params;
+    await db.ref(`products/${productId}/sub_products/${subId}`).remove();
+    await db.ref(`stock/${subId}`).remove();
+    res.json({ success: true, message: "Variasi berhasil dihapus" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// --- ENDPOINT: Admin Hapus Stock Key ---
+app.delete("/admin/stock/:subId/:keyId", adminAuth, async (req, res) => {
+  try {
+    const { subId, keyId } = req.params;
+    await db.ref(`stock/${subId}/${keyId}`).remove();
+    res.json({ success: true, message: "Key berhasil dihapus" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // --- ENDPOINT: Admin Simpan Template Email ---
 app.post("/admin/settings/emailTemplate", adminAuth, async (req, res) => {
   try {
