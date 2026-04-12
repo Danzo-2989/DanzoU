@@ -216,6 +216,30 @@ app.post("/admin/stock/:subId", adminAuth, async (req, res) => {
   }
 });
 
+// --- ENDPOINT: Admin Tambah Game Variant ---
+app.post("/admin/products/:id/game_variants", adminAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const gameRef = db.ref(`products/${id}/game_variants`);
+    const newGameRef = gameRef.push();
+    await newGameRef.set(req.body);
+    res.json({ success: true, message: "Game variant berhasil ditambahkan" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// --- ENDPOINT: Admin Hapus Game Variant ---
+app.delete("/admin/products/:productId/game_variants/:gameId", adminAuth, async (req, res) => {
+  try {
+    const { productId, gameId } = req.params;
+    await db.ref(`products/${productId}/game_variants/${gameId}`).remove();
+    res.json({ success: true, message: "Game variant berhasil dihapus" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // --- ENDPOINT: Admin Hapus Produk ---
 app.delete("/admin/products/:id", adminAuth, async (req, res) => {
   try {
