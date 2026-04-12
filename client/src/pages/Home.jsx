@@ -144,7 +144,7 @@ function Home() {
 
       {/* ── KEUNGGULAN ── */}
       <div className="flex flex-col gap-3 animate-fade-in-up">
-        <p className="font-black uppercase text-center text-xs md:text-sm tracking-[0.25em] opacity-50">✦ KENAPA BELI DI SINI ✦</p>
+        <p className="font-black uppercase text-center text-xs md:text-sm tracking-[0.25em] opacity-50">BENEFIT BELI DI KAMI</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           {features.map((f, i) => (
             <div key={i} className="neo-card bg-white flex flex-col items-center text-center gap-3 py-5 px-3 md:py-6 md:px-6">
@@ -162,8 +162,8 @@ function Home() {
 
       {/* ── KONTAK ── */}
       <div className="flex flex-col gap-3 animate-fade-in-up">
-        <p className="font-black uppercase text-center text-xs md:text-sm tracking-[0.25em] opacity-50">✦ HUBUNGI KAMI ✦</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+        <p className="font-black uppercase text-center text-xs md:text-sm tracking-[0.25em] opacity-50">CONTACT OWNER</p>
+        <div className="grid grid-cols-2 gap-3">
           <a href="https://wa.me/6289685410080" target="_blank" rel="noopener noreferrer"
             className="neo-card bg-green-400 flex items-center justify-center gap-3 py-4 md:py-5 font-black uppercase text-base md:text-xl tracking-wider hover:-translate-y-2 hover:shadow-neo-heavy transition-all duration-200 text-neo-dark">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
@@ -172,7 +172,7 @@ function Home() {
             WHATSAPP
           </a>
           <a href="https://t.me/DanzoStoreID" target="_blank" rel="noopener noreferrer"
-            className="neo-card bg-sky-400 flex items-center justify-center gap-3 py-4 md:py-5 font-black uppercase text-base md:text-xl tracking-wider hover:-translate-y-2 hover:shadow-neo-heavy transition-all duration-200 text-neo-dark">
+            className="neo-card bg-sky-400 flex items-center justify-center gap-2 py-4 font-black uppercase text-sm tracking-wider hover:-translate-y-2 hover:shadow-neo-heavy transition-all duration-200 text-neo-dark">
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
               <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
             </svg>
