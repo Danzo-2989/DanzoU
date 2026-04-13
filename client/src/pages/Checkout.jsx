@@ -106,7 +106,7 @@ function Checkout() {
           {/* ===== SUCCESS STATE ===== */}
           {status === 'success' ? (
             <div className="flex flex-col items-center gap-6 py-8">
-              <div className="bg-neo-green p-6 border-4 border-neo-dark shadow-neo">
+              <div className="bg-neo-green text-slate-900 p-6 border-4 border-neo-border shadow-neo">
                 <CheckCircle2 size={64} strokeWidth={2.5} className="text-neo-dark" />
               </div>
               <h2 className="text-4xl font-black uppercase text-center">Pembayaran Sukses!</h2>
@@ -116,11 +116,11 @@ function Checkout() {
 
               {/* KEY BOX */}
               <div className="w-full flex flex-col gap-3">
-                <div className="flex items-center gap-2 bg-neo-green border-4 border-neo-dark px-4 py-2 shadow-neo w-fit">
+                <div className="flex items-center gap-2 bg-neo-green text-slate-900 border-4 border-neo-border px-4 py-2 shadow-neo w-fit">
                   <Key size={18} strokeWidth={3}/>
                   <span className="font-black uppercase text-sm tracking-wider">License Key Kamu</span>
                 </div>
-                <div className="border-4 border-neo-dark shadow-[4px_4px_0px_0px_#1e293b] bg-neo-dark p-4 flex items-center justify-between gap-4">
+                <div className="border-4 border-neo-border shadow-[4px_4px_0px_0px_var(--color-neo-border)] bg-neo-dark p-4 flex items-center justify-between gap-4">
                   <span className="font-mono text-neo-green font-bold text-lg break-all flex-1 select-all">
                     {licenseKey || '(key tidak tersedia)'}
                   </span>
@@ -128,8 +128,8 @@ function Checkout() {
                     onClick={handleCopy}
                     className={`shrink-0 border-4 border-white p-3 transition-all duration-200 font-black
                       ${copied 
-                        ? 'bg-neo-green text-neo-dark border-neo-green' 
-                        : 'bg-neo-surface text-neo-dark hover:-translate-y-1 hover:shadow-[4px_4px_0_0_var(--color-neo-dark)]'
+                        ? 'bg-neo-green text-slate-900  border-neo-green' 
+                        : 'bg-neo-surface text-neo-dark hover:-translate-y-1 hover:shadow-[4px_4px_0_0_var(--color-neo-border)]'
                       }`}
                     title="Copy key"
                   >
@@ -144,7 +144,7 @@ function Checkout() {
               </div>
 
               {/* Email info */}
-              <div className="w-full bg-indigo-50 dark:bg-indigo-900 border-4 border-neo-dark p-4 shadow-[4px_4px_0px_0px_var(--color-neo-dark)] text-sm font-bold text-center">
+              <div className="w-full bg-indigo-50 dark:bg-indigo-900 border-4 border-neo-border p-4 shadow-[4px_4px_0px_0px_var(--color-neo-border)] text-sm font-bold text-center">
                 <Mail size={16} className="inline mr-2 opacity-60"/>
                 Key juga dikirim ke: <span className="font-mono bg-neo-dark text-neo-green px-2 py-0.5 ml-1">{email}</span>
               </div>
@@ -156,12 +156,12 @@ function Checkout() {
 
           ) : (
             <>
-              <div className="border-b-4 border-neo-dark pb-6 mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+              <div className="border-b-4 border-neo-border pb-6 mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
                   <h1 className="text-3xl font-black uppercase leading-none line-clamp-1 text-neo-dark">{product?.name}</h1>
                   <p className="font-bold opacity-60 text-lg uppercase text-neo-dark">{subProduct.label}</p>
                 </div>
-                <div className="bg-neo-green border-4 border-neo-dark px-3 py-1 shadow-neo text-neo-dark shrink-0">
+                <div className="bg-neo-green text-slate-900 border-4 border-neo-border px-3 py-1 shadow-neo  shrink-0">
                   <span className="font-black">Rp {subProduct.price.toLocaleString()}</span>
                 </div>
               </div>
@@ -170,11 +170,11 @@ function Checkout() {
               {status === 'pending' ? (
                 <div className="flex flex-col items-center gap-6 py-4 animate-fade-in-up">
                   <h2 className="text-2xl font-black uppercase tracking-tight text-neo-dark">Scan QRIS Untuk Bayar</h2>
-                  <div className="p-4 bg-neo-surface border-4 border-neo-dark shadow-neo-heavy flex flex-col gap-4">
+                  <div className="p-4 bg-neo-surface border-4 border-neo-border shadow-neo-heavy flex flex-col gap-4">
                     <img src={paymentData.qris_image_url} alt="QRIS" className="w-64 h-64 object-contain mx-auto" />
                     
                     {paymentData.total_amount && (
-                      <div className="w-full flex flex-col gap-2 border-t-4 border-neo-dark pt-4 font-bold uppercase text-neo-dark text-sm">
+                      <div className="w-full flex flex-col gap-2 border-t-4 border-neo-border pt-4 font-bold uppercase text-neo-dark text-sm">
                         <div className="flex justify-between">
                           <span>Harga Aplikasi</span>
                           <span>Rp {subProduct.price.toLocaleString()}</span>
@@ -192,7 +192,7 @@ function Checkout() {
                     )}
                   </div>
 
-                  <div className="bg-neo-dark text-neo-green w-full text-center font-mono font-bold border-4 border-neo-dark p-3 shadow-neo tracking-widest uppercase text-sm">
+                  <div className="bg-neo-dark text-neo-green w-full text-center font-mono font-bold border-4 border-neo-border p-3 shadow-neo tracking-widest uppercase text-sm">
                     Menunggu Pembayaran...
                   </div>
                   <div className="flex items-center gap-3 font-bold text-sm opacity-70 text-neo-dark">
@@ -204,7 +204,7 @@ function Checkout() {
                 /* ===== FORM STATE ===== */
                 <form onSubmit={handlePayment} className="flex flex-col gap-8 animate-fade-in-up">
                   <div className="flex flex-col gap-3">
-                    <label className="font-black flex items-center gap-2 bg-neo-green border-4 border-neo-dark w-fit px-4 py-2 shadow-neo text-neo-dark">
+                    <label className="font-black flex items-center gap-2 bg-neo-green text-slate-900 border-4 border-neo-border w-fit px-4 py-2 shadow-neo ">
                       <Mail size={18} /> EMAIL PENERIMA
                     </label>
                     <input 
@@ -217,7 +217,7 @@ function Checkout() {
                     />
                   </div>
 
-                  <div className="bg-orange-50 dark:bg-orange-900 border-4 border-neo-dark p-4 flex gap-4 text-neo-dark shadow-[4px_4px_0px_0px_var(--color-neo-dark)]">
+                  <div className="bg-orange-50 dark:bg-orange-900 border-4 border-neo-border p-4 flex gap-4 text-neo-dark shadow-[4px_4px_0px_0px_var(--color-neo-border)]">
                     <AlertTriangle className="shrink-0 text-orange-500" size={24} />
                     <p className="text-xs font-bold uppercase opacity-80 mt-1">
                       Barang digital tidak dapat direfund. Membeli = setuju.

@@ -53,7 +53,7 @@ function Home() {
     PREMIUM: 'bg-orange-400', VIP: 'bg-pink-400', FREEFIRE: 'bg-orange-500',
     MLBB: 'bg-blue-500', RESELLER: 'bg-violet-400',
   };
-  const getBadgeColor = (tag) => tagColorMap[tag.toUpperCase()] || 'bg-neo-green';
+  const getBadgeColor = (tag) => tagColorMap[tag.toUpperCase()] || 'bg-neo-green text-slate-900';
 
   // Deteksi apakah URL adalah YouTube
   const getYoutubeId = (url) => {
@@ -74,7 +74,7 @@ function Home() {
   };
 
   const features = [
-    { icon: <DollarSign size={22} strokeWidth={2.5} />, color: 'bg-neo-green',  title: 'Harga Termurah', desc: 'Harga murah & kompetitif' },
+    { icon: <DollarSign size={22} strokeWidth={2.5} />, color: 'bg-neo-green text-slate-900',  title: 'Harga Termurah', desc: 'Harga murah & kompetitif' },
     { icon: <Zap        size={22} strokeWidth={2.5} />, color: 'bg-yellow-300', title: 'Proses Kilat',   desc: 'Pengerjaan cepat' },
     { icon: <Lock       size={22} strokeWidth={2.5} />, color: 'bg-sky-300',    title: 'Aman',           desc: 'Trusted seller & aman' },
     { icon: <Clock      size={22} strokeWidth={2.5} />, color: 'bg-purple-300', title: 'Open 24/7',      desc: 'Siap melayani kapan saja' },
@@ -86,8 +86,8 @@ function Home() {
       {/* ── HEADER ── */}
       <header className="flex items-center gap-3 neo-card bg-neo-surface animate-fade-in-up py-3 px-4 md:py-6 md:px-6 justify-between">
         <div className="flex items-center gap-3">
-          <div className="bg-neo-green border-4 border-neo-dark p-2 md:p-3 shadow-neo shrink-0">
-            <KeyRound size={24} className="text-neo-dark" strokeWidth={2.5}/>
+          <div className="bg-neo-green text-slate-900 border-4 border-neo-border p-2 md:p-3 shadow-neo shrink-0">
+            <KeyRound size={24} className="text-slate-900" strokeWidth={2.5}/>
           </div>
           <div>
             <h1 className="text-2xl md:text-5xl font-black uppercase tracking-tighter leading-none text-neo-dark">
@@ -99,7 +99,7 @@ function Home() {
           </div>
         </div>
         <button onClick={toggleTheme} title="Toggle Dark/Light Mode"
-          className="bg-neo-surface border-4 border-neo-dark p-2 md:p-3 shadow-neo hover:-translate-y-1 hover:shadow-neo-heavy transition-all cursor-pointer">
+          className="bg-neo-surface border-4 border-neo-border p-2 md:p-3 shadow-neo hover:-translate-y-1 hover:shadow-neo-heavy transition-all cursor-pointer">
           {isDark ? <Sun size={24} className="text-neo-dark" strokeWidth={3}/> : <Moon size={24} className="text-neo-dark" strokeWidth={3}/>}
         </button>
       </header>
@@ -107,14 +107,14 @@ function Home() {
       {/* ── PENCARIAN & FILTER KATEGORI ── */}
       <div className="flex flex-col md:flex-row gap-3 animate-fade-in-up">
         {/* Kolom Pencarian */}
-        <div className="flex bg-neo-surface border-4 border-neo-dark shadow-[3px_3px_0px_0px_var(--color-neo-dark)] flex-1 max-w-sm focus-within:-translate-y-1 focus-within:shadow-[4px_4px_0_0_var(--color-neo-dark)] transition-all h-10 md:h-12">
-          <div className="bg-neo-green px-3 border-r-4 border-neo-dark flex items-center justify-center text-neo-dark">
+        <div className="flex bg-neo-surface border-4 border-neo-border shadow-[3px_3px_0px_0px_var(--color-neo-border)] flex-1 max-w-sm focus-within:-translate-y-1 focus-within:shadow-[4px_4px_0_0_var(--color-neo-border)] transition-all h-10 md:h-12">
+          <div className="bg-neo-green text-slate-900 px-3 border-r-4 border-neo-border flex items-center justify-center ">
             <Search size={18} strokeWidth={3}/>
           </div>
           <input type="text" placeholder="CARI PRODUK..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
             className="w-full px-3 font-bold uppercase text-neo-dark outline-none bg-transparent placeholder:opacity-50 text-xs md:text-sm"/>
           {searchQuery && (
-            <button onClick={() => setSearchQuery('')} className="px-3 flex items-center justify-center text-neo-dark hover:bg-red-200 border-l-4 border-neo-dark">
+            <button onClick={() => setSearchQuery('')} className="px-3 flex items-center justify-center text-neo-dark hover:bg-red-200 border-l-4 border-neo-border">
               <X size={16} strokeWidth={3}/>
             </button>
           )}
@@ -127,10 +127,10 @@ function Home() {
               <button
                 key={cat}
                 onClick={() => setActiveFilter(cat)}
-                className={`shrink-0 border-4 border-neo-dark px-3 py-1.5 md:px-5 md:py-1.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 h-10 md:h-12
+                className={`shrink-0 border-4 border-neo-border px-3 py-1.5 md:px-5 md:py-1.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 h-10 md:h-12
                   ${activeFilter === cat
-                    ? 'bg-neo-dark text-white shadow-none translate-x-0.5 translate-y-0.5'
-                    : 'bg-neo-surface hover:-translate-y-1 shadow-[3px_3px_0px_0px_var(--color-neo-dark)] hover:shadow-[4px_4px_0px_0px_var(--color-neo-dark)]'
+                    ? 'bg-neo-dark text-neo-surface shadow-none translate-x-0.5 translate-y-0.5'
+                    : 'bg-neo-surface hover:-translate-y-1 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:shadow-[4px_4px_0px_0px_var(--color-neo-border)]'
                   }`}
               >
                 {cat}
@@ -148,7 +148,7 @@ function Home() {
           return (
             <div key={id} className="neo-card flex flex-col gap-2 md:gap-4 animate-fade-in-up bg-neo-surface p-3 md:p-6">
               {/* Gambar */}
-              <div className="h-28 md:h-48 border-4 border-neo-dark bg-rose-100 flex items-center justify-center overflow-hidden relative font-black uppercase text-2xl">
+              <div className="h-28 md:h-48 border-4 border-neo-border bg-rose-100 flex items-center justify-center overflow-hidden relative font-black uppercase text-2xl">
                 {product.image ? (
                   <>
                     <div className="absolute inset-0 bg-cover bg-center blur-lg opacity-40 scale-110 grayscale"
@@ -160,14 +160,14 @@ function Home() {
                   <span className="opacity-30 text-2xl">APP</span>
                 )}
                 {firstTag && (
-                  <span className={`absolute top-0 left-0 z-20 ${getBadgeColor(firstTag)} border-r-4 border-b-4 border-neo-dark px-2 py-0.5 text-[9px] md:text-xs font-black uppercase text-neo-dark`}>
+                  <span className={`absolute top-0 left-0 z-20 ${getBadgeColor(firstTag)} border-r-4 border-b-4 border-neo-border px-2 py-0.5 text-[9px] md:text-xs font-black uppercase text-slate-900`}>
                     {firstTag}
                   </span>
                 )}
                 {/* Video indicator */}
                 {product.feature_media && isVideoUrl(product.feature_media) && (
-                  <div className="absolute top-0 right-0 z-20 bg-red-500 border-l-4 border-b-4 border-neo-dark p-1">
-                    <Play size={10} fill="white" className="text-white"/>
+                  <div className="absolute top-0 right-0 z-20 bg-red-500 border-l-4 border-b-4 border-neo-border p-1">
+                    <Play size={10} fill="white" className="text-neo-surface"/>
                   </div>
                 )}
               </div>
@@ -179,7 +179,7 @@ function Home() {
                 {product.tags && (
                   <div className="flex flex-wrap gap-1 mt-1">
                     {product.tags.split(',').map((t, i) => (
-                      <span key={i} className={`${getBadgeColor(t.trim())} border-2 border-neo-dark px-1.5 py-0.5 text-[8px] md:text-[10px] font-black uppercase`}>
+                      <span key={i} className={`${getBadgeColor(t.trim())} text-slate-900 border-2 border-neo-border px-1.5 py-0.5 text-[8px] md:text-[10px] font-black uppercase`}>
                         {t.trim()}
                       </span>
                     ))}
@@ -191,14 +191,14 @@ function Home() {
               <div className="mt-auto flex flex-col gap-2">
                 <button
                   onClick={() => navigate(`/product/${id}`)}
-                  className="w-full text-xs md:text-base py-2 md:py-3 border-4 border-neo-dark font-black uppercase flex items-center justify-center gap-1 transition-all bg-neo-green hover:-translate-y-1 shadow-[4px_4px_0px_0px_#1e293b] active:translate-y-1 active:shadow-none"
+                  className="w-full text-xs md:text-base py-2 md:py-3 border-4 border-neo-border font-black uppercase flex items-center justify-center gap-1 transition-all bg-neo-green text-slate-900 hover:-translate-y-1 shadow-[4px_4px_0px_0px_var(--color-neo-border)] active:translate-y-1 active:shadow-none"
                 >
                   🛒 BELI
                 </button>
                 {hasMedia && (
                   <button
                     onClick={() => openPreview(product)}
-                    className="w-full text-xs md:text-sm py-1.5 md:py-2 border-4 border-neo-dark font-black uppercase flex items-center justify-center gap-1 transition-all bg-neo-dark text-white hover:-translate-y-1 shadow-[4px_4px_0px_0px_#1e293b] active:translate-y-1 active:shadow-none"
+                    className="w-full text-xs md:text-sm py-1.5 md:py-2 border-4 border-neo-border font-black uppercase flex items-center justify-center gap-1 transition-all bg-neo-dark text-neo-surface hover:-translate-y-1 shadow-[4px_4px_0px_0px_var(--color-neo-border)] active:translate-y-1 active:shadow-none"
                   >
                     <Play size={12} fill="currentColor"/> SEE FEATURES
                   </button>
@@ -211,7 +211,7 @@ function Home() {
 
       {filteredProducts.length === 0 && (
         <div className="neo-card text-center py-12 animate-fade-in-up flex flex-col items-center justify-center max-w-2xl mx-auto w-full bg-neo-surface text-neo-dark">
-          <div className="bg-neo-green p-3 border-4 border-neo-dark shadow-neo mb-4">
+          <div className="bg-neo-green text-slate-900 p-3 border-4 border-neo-border shadow-neo mb-4">
             <CircleAlert size={32} strokeWidth={2.5} />
           </div>
           <h2 className="text-2xl font-black uppercase mb-2">
@@ -229,7 +229,7 @@ function Home() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           {features.map((f, i) => (
             <div key={i} className="neo-card bg-neo-surface flex flex-col items-center text-center gap-3 py-5 px-3 md:py-6 md:px-6">
-              <div className={`${f.color} border-4 border-neo-dark p-3 shadow-neo`}>{f.icon}</div>
+              <div className={`${f.color} border-4 border-neo-border p-3 shadow-neo`}>{f.icon}</div>
               <div>
                 <h3 className="font-black uppercase text-xs md:text-base leading-tight">{f.title}</h3>
                 <p className="text-[10px] md:text-sm font-semibold opacity-60 mt-1">{f.desc}</p>
@@ -266,11 +266,11 @@ function Home() {
           ✦ METODE PEMBAYARAN RESMI ✦
         </p>
         <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4">
-          <div className="border-4 border-neo-dark px-3 md:px-5 py-2 md:py-3 shadow-[4px_4px_0px_0px_var(--color-neo-dark)] bg-neo-surface font-black text-sm md:text-lg flex items-center gap-1"><span>▣</span> QRIS</div>
-          <div className="border-4 border-neo-dark px-3 md:px-5 py-2 md:py-3 shadow-[4px_4px_0px_0px_var(--color-neo-dark)] bg-[#108EE9] text-white font-black text-sm md:text-lg">DANA</div>
-          <div className="border-4 border-neo-dark px-3 md:px-5 py-2 md:py-3 shadow-[4px_4px_0px_0px_var(--color-neo-dark)] bg-[#00AED6] text-white font-black text-sm md:text-lg">GoPay</div>
-          <div className="border-4 border-neo-dark px-3 md:px-5 py-2 md:py-3 shadow-[4px_4px_0px_0px_var(--color-neo-dark)] bg-[#4C3494] text-white font-black text-sm md:text-lg">OVO</div>
-          <div className="border-4 border-neo-dark px-3 md:px-5 py-2 md:py-3 shadow-[4px_4px_0px_0px_var(--color-neo-dark)] bg-[#EE4D2D] text-white font-black text-sm md:text-lg">ShopeePay</div>
+          <div className="border-4 border-neo-border px-3 md:px-5 py-2 md:py-3 shadow-[4px_4px_0px_0px_var(--color-neo-border)] bg-neo-surface font-black text-sm md:text-lg flex items-center gap-1"><span className="text-neo-dark">▣</span> QRIS</div>
+          <div className="border-4 border-neo-border px-3 md:px-5 py-2 md:py-3 shadow-[4px_4px_0px_0px_var(--color-neo-border)] bg-[#108EE9] text-white font-black text-sm md:text-lg">DANA</div>
+          <div className="border-4 border-neo-border px-3 md:px-5 py-2 md:py-3 shadow-[4px_4px_0px_0px_var(--color-neo-border)] bg-[#00AED6] text-white font-black text-sm md:text-lg">GoPay</div>
+          <div className="border-4 border-neo-border px-3 md:px-5 py-2 md:py-3 shadow-[4px_4px_0px_0px_var(--color-neo-border)] bg-[#4C3494] text-white font-black text-sm md:text-lg">OVO</div>
+          <div className="border-4 border-neo-border px-3 md:px-5 py-2 md:py-3 shadow-[4px_4px_0px_0px_var(--color-neo-border)] bg-[#EE4D2D] text-white font-black text-sm md:text-lg">ShopeePay</div>
         </div>
       </div>
 
@@ -286,17 +286,17 @@ function Home() {
           onClick={() => setPreviewProduct(null)}
         >
           <div
-            className="relative w-full max-w-2xl border-4 border-neo-dark shadow-[8px_8px_0px_0px_#34d399] bg-neo-dark"
+            className="relative w-full max-w-2xl border-4 border-neo-border shadow-[8px_8px_0px_0px_#34d399] bg-neo-dark"
             onClick={e => e.stopPropagation()}
           >
             {/* Header modal */}
-            <div className="flex items-center justify-between px-4 py-3 border-b-4 border-neo-dark bg-neo-green">
+            <div className="flex items-center justify-between px-4 py-3 border-b-4 border-neo-border bg-neo-green text-slate-900">
               <span className="font-black uppercase text-sm tracking-wider text-neo-dark">
                 REVIEW {previewProduct.name}
               </span>
               <button
                 onClick={() => setPreviewProduct(null)}
-                className="bg-neo-dark text-white border-2 border-neo-dark p-1 hover:bg-red-500 transition-all"
+                className="bg-neo-dark text-neo-surface border-2 border-neo-border p-1 hover:bg-red-500 transition-all"
               >
                 <X size={18} strokeWidth={3}/>
               </button>
@@ -323,7 +323,7 @@ function Home() {
               )}
             </div>
 
-            <p className="text-center text-xs font-bold opacity-40 text-white py-2 uppercase tracking-widest">
+            <p className="text-center text-xs font-bold opacity-40 text-neo-surface py-2 uppercase tracking-widest">
               Klik area luar untuk menutup
             </p>
           </div>
