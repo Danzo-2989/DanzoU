@@ -10,6 +10,7 @@ function Admin() {
   const [products, setProducts] = useState({});
   const [stock, setStock] = useState({});
   const [transactions, setTransactions] = useState({});
+  const [trxFilter, setTrxFilter] = useState('ALL');
   const [emailTemplate, setEmailTemplate] = useState('');
   const [announcement, setAnnouncement] = useState({
     enabled: false,
@@ -167,9 +168,16 @@ function Admin() {
     } catch (err) { alert(err.response?.data?.message || 'Gagal mengirim ulang'); }
   };
 
-  const handleAuth = (e) => {
+  const handleAuth = async (e) => {
     e.preventDefault();
-    setAuth({ ...auth, isAuthed: true });
+    try {
+      const res = await axios.post(`${backendUrl}/admin/login`, { password: auth.password });
+      if (res.data.success) {
+        setAuth({ ...auth, isAuthed: true });
+      }
+    } catch (err) {
+      alert(err.response?.data?.message || 'Password salah!');
+    }
   };
 
   const PRESET_TAGS = ['Android', 'iOS', 'PC', 'Windows', 'Mac', 'Free', 'Premium', 'VIP', 'No Root', 'Root'];
@@ -547,11 +555,27 @@ function Admin() {
         <section className="neo-card flex flex-col gap-6 lg:col-span-2 animate-fade-in-up">
           <h2 className="text-2xl font-black uppercase flex items-center gap-3 border-b-4 border-neo-border pb-4">
             <div className="bg-purple-300 border-4 border-neo-border p-2"><Package size={24} strokeWidth={3}/></div>
-            Riwayat Transaksi & Resend
+            Riwayat Transaksi
           </h2>
+          
+          <div className="flex flex-wrap gap-2">
+            {['ALL', 'SUCCESS', 'PENDING'].map(filter => (
+              <button
+                key={filter}
+                onClick={() => setTrxFilter(filter)}
+                className={`border-4 border-neo-border px-4 py-2 font-black uppercase text-xs transition-all shadow-[3px_3px_0px_0px_var(--color-neo-border)]
+                  ${trxFilter === filter ? 'bg-neo-dark text-neo-surface shadow-none translate-x-0.5 translate-y-0.5' : 'bg-neo-surface text-neo-dark hover:-translate-y-1'}`}
+              >
+                {filter === 'ALL' ? 'Semua' : filter}
+              </button>
+            ))}
+          </div>
+
           <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2">
             {Object.keys(transactions).length === 0 && <p className="font-bold opacity-50 text-center py-4">Belum ada transaksi.</p>}
-            {Object.entries(transactions).sort((a,b) => b[1].created_at - a[1].created_at).map(([tid, trx]) => (
+            {Object.entries(transactions)
+              .filter(([tid, trx]) => trxFilter === 'ALL' || trx.status?.toLowerCase() === trxFilter.toLowerCase())
+              .sort((a,b) => b[1].created_at - a[1].created_at).map(([tid, trx]) => (
               <div key={tid} className="border-4 border-neo-border bg-neo-surface shadow-[4px_4px_0_0_var(--color-neo-border)] p-4 flex flex-col md:flex-row justify-between md:items-center gap-4">
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
