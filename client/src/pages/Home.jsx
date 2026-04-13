@@ -267,11 +267,11 @@ function Home() {
                   const ytId = getYoutubeId(previewProduct.mediaUrl);
                   return ytId ? (
                     <iframe
-  src={`https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=1&rel=0&loop=1&playlist=${ytId}`}
-  className="w-full aspect-video"
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-  allowFullScreen
-/>
+                      src={`https://www.youtube.com/embed/${ytId}?autoplay=1`}
+                      className="w-full aspect-video"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
                   ) : (
                     <video src={previewProduct.mediaUrl} controls autoPlay className="w-full aspect-video"/>
                   );
