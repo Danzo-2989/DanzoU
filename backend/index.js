@@ -102,6 +102,15 @@ app.post("/checkout", async (req, res) => {
   }
 });
 
+// --- ENDPOINT: Admin Login ---
+app.post("/admin/login", (req, res) => {
+  const { password } = req.body;
+  if (password === process.env.ADMIN_PASSWORD) {
+    return res.json({ success: true, message: "Login success" });
+  }
+  return res.status(401).json({ success: false, message: "Password salah!" });
+});
+
 // --- ENDPOINT: Check Status & Fulfill ---
 app.get("/status/:trx_id", async (req, res) => {
   const { trx_id } = req.params;
