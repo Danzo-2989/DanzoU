@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { ref, onValue } from 'firebase/database';
 import { useNavigate } from 'react-router-dom';
-import { Zap, CircleAlert, KeyRound, DollarSign, Lock, Clock, X, Play } from 'lucide-react';
+import { Zap, CircleAlert, KeyRound, DollarSign, Lock, Clock, X, Play, Search } from 'lucide-react';
 
 function Home() {
   const [products, setProducts] = useState({});
   const [stock, setStock] = useState({});
   const [activeFilter, setActiveFilter] = useState('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
   const [previewProduct, setPreviewProduct] = useState(null); // { name, mediaUrl, mediaType }
   const navigate = useNavigate();
 
@@ -23,6 +24,10 @@ function Home() {
   )];
 
   const filteredProducts = Object.entries(products).filter(([, product]) => {
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          (product.desc && product.desc.toLowerCase().includes(searchQuery.toLowerCase()));
+    if (!matchesSearch) return false;
+
     if (activeFilter === 'ALL') return true;
     if (!product.tags) return false;
     return product.tags.split(',').map(t => t.trim().toUpperCase()).includes(activeFilter);
@@ -79,24 +84,41 @@ function Home() {
         </div>
       </header>
 
-      {/* ── FILTER KATEGORI ── */}
-      {allCategories.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto pb-1 animate-fade-in-up">
-          {allCategories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveFilter(cat)}
-              className={`shrink-0 border-4 border-neo-dark px-3 py-1.5 md:px-5 md:py-2 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150
-                ${activeFilter === cat
-                  ? 'bg-neo-dark text-white shadow-none translate-x-0.5 translate-y-0.5'
-                  : 'bg-white hover:-translate-y-1 shadow-[3px_3px_0px_0px_#1e293b] hover:shadow-[4px_4px_0px_0px_#1e293b]'
-                }`}
-            >
-              {cat}
+      {/* ── PENCARIAN & FILTER KATEGORI ── */}
+      <div className="flex flex-col md:flex-row gap-3 animate-fade-in-up">
+        {/* Kolom Pencarian */}
+        <div className="flex bg-white border-4 border-neo-dark shadow-[3px_3px_0px_0px_#1e293b] flex-1 max-w-sm focus-within:-translate-y-1 focus-within:shadow-[4px_4px_0_0_#1e293b] transition-all h-10 md:h-12">
+          <div className="bg-neo-green px-3 border-r-4 border-neo-dark flex items-center justify-center text-neo-dark">
+            <Search size={18} strokeWidth={3}/>
+          </div>
+          <input type="text" placeholder="CARI PRODUK..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+            className="w-full px-3 font-bold uppercase text-neo-dark outline-none bg-transparent placeholder:opacity-50 text-xs md:text-sm"/>
+          {searchQuery && (
+            <button onClick={() => setSearchQuery('')} className="px-3 flex items-center justify-center text-neo-dark hover:bg-red-200 border-l-4 border-neo-dark">
+              <X size={16} strokeWidth={3}/>
             </button>
-          ))}
+          )}
         </div>
-      )}
+
+        {/* Filter Kategori */}
+        {allCategories.length > 1 && (
+          <div className="flex gap-2 overflow-x-auto pb-1 flex-1 items-center">
+            {allCategories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveFilter(cat)}
+                className={`shrink-0 border-4 border-neo-dark px-3 py-1.5 md:px-5 md:py-1.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 h-10 md:h-12
+                  ${activeFilter === cat
+                    ? 'bg-neo-dark text-white shadow-none translate-x-0.5 translate-y-0.5'
+                    : 'bg-white hover:-translate-y-1 shadow-[3px_3px_0px_0px_#1e293b] hover:shadow-[4px_4px_0px_0px_#1e293b]'
+                  }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* ── GRID PRODUK ── */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">

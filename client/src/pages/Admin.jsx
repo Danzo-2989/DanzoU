@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { ref, onValue } from 'firebase/database';
-import { LayoutDashboard, Plus, Package, Mail, ListPlus, ArrowLeft, Zap, Lock, Trash2, ChevronDown, ChevronUp, Key, Tag, Gamepad2, X, Pencil, Check, Save, Megaphone } from 'lucide-react';
+import { LayoutDashboard, Plus, Package, Mail, ListPlus, ArrowLeft, Zap, Lock, Trash2, ChevronDown, ChevronUp, Key, Tag, Gamepad2, X, Pencil, Check, Save, Megaphone, Send } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -9,6 +9,7 @@ function Admin() {
   const navigate = useNavigate();
   const [products, setProducts] = useState({});
   const [stock, setStock] = useState({});
+  const [transactions, setTransactions] = useState({});
   const [emailTemplate, setEmailTemplate] = useState('');
   const [announcement, setAnnouncement] = useState({
     enabled: false,
@@ -33,6 +34,7 @@ function Admin() {
   useEffect(() => {
     onValue(ref(db, 'products'), (snapshot) => { setProducts(snapshot.val() || {}); });
     onValue(ref(db, 'stock'), (snapshot) => { setStock(snapshot.val() || {}); });
+    onValue(ref(db, 'transactions'), (snapshot) => { setTransactions(snapshot.val() || {}); });
     onValue(ref(db, 'settings/emailTemplate'), (snapshot) => { setEmailTemplate(snapshot.val() || ''); });
     onValue(ref(db, 'settings/announcement'), (snapshot) => {
       const data = snapshot.val();
@@ -155,6 +157,14 @@ function Admin() {
       await axios.post(`${backendUrl}/admin/settings/announcement`, announcement, { headers: { 'x-admin-password': auth.password }});
       alert('Pengumuman website berhasil disimpan!');
     } catch (err) { alert(err.response?.data?.message || 'Gagal simpan pengumuman'); }
+  };
+
+  const resendKey = async (trxId) => {
+    if (!confirm('Kirim ulang email ke pembeli ini?')) return;
+    try {
+      await axios.post(`${backendUrl}/admin/transactions/${trxId}/resend`, {}, { headers: { 'x-admin-password': auth.password }});
+      alert('Email berhasil dikirim ulang!');
+    } catch (err) { alert(err.response?.data?.message || 'Gagal mengirim ulang'); }
   };
 
   const handleAuth = (e) => {
@@ -527,6 +537,42 @@ function Admin() {
                       );
                     })}
                   </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Riwayat Transaksi */}
+        <section className="neo-card flex flex-col gap-6 lg:col-span-2 animate-fade-in-up">
+          <h2 className="text-2xl font-black uppercase flex items-center gap-3 border-b-4 border-neo-dark pb-4">
+            <div className="bg-purple-300 border-4 border-neo-dark p-2"><Package size={24} strokeWidth={3}/></div>
+            Riwayat Transaksi & Resend
+          </h2>
+          <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2">
+            {Object.keys(transactions).length === 0 && <p className="font-bold opacity-50 text-center py-4">Belum ada transaksi.</p>}
+            {Object.entries(transactions).sort((a,b) => b[1].created_at - a[1].created_at).map(([tid, trx]) => (
+              <div key={tid} className="border-4 border-neo-dark bg-white shadow-[4px_4px_0_0_#1e293b] p-4 flex flex-col md:flex-row justify-between md:items-center gap-4">
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-black uppercase text-sm md:text-base">{trx.product_name}</span>
+                    <span className={`text-[9px] md:text-[10px] font-black px-2 py-0.5 border-2 border-neo-dark ${trx.status === 'success' ? 'bg-green-300' : 'bg-yellow-300'} uppercase`}>
+                      {trx.status}
+                    </span>
+                  </div>
+                  <p className="font-bold text-xs opacity-60">📧 {trx.buyer_email}</p>
+                  <p className="font-bold text-xs opacity-60">💰 Rp {trx.amount?.toLocaleString('id-ID')} | 🕒 {new Date(trx.created_at).toLocaleString('id-ID')}</p>
+                  {trx.key_delivered && (
+                    <p className="font-mono text-xs mt-1 bg-gray-100 border-2 border-neo-dark px-2 py-1 select-all break-all text-neo-dark w-fit">
+                      🔑 {trx.key_delivered}
+                    </p>
+                  )}
+                </div>
+                {trx.status === 'success' && trx.key_delivered && (
+                  <button onClick={() => resendKey(tid)}
+                    className="shrink-0 bg-neo-dark text-white border-4 border-neo-dark px-4 py-2 font-black uppercase text-xs hover:-translate-y-1 transition-all shadow-[4px_4px_0px_0px_#34d399] flex items-center justify-center gap-2 h-fit">
+                    <Send size={14} strokeWidth={3}/> Resend Key
+                  </button>
                 )}
               </div>
             ))}
