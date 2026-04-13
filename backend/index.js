@@ -54,7 +54,7 @@ async function sendEmail(to, subject, text) {
 
 // --- ENDPOINT: Create Checkout ---
 app.post("/checkout", async (req, res) => {
-  const { subProductId, email, price, productName } = req.body;
+  const { subProductId, email, whatsapp, price, productName } = req.body;
 
   try {
     const reference_id = `TRX-${Date.now()}`;
@@ -78,6 +78,7 @@ app.post("/checkout", async (req, res) => {
         sub_product_id: subProductId,
         product_name: productName,
         buyer_email: email,
+        buyer_whatsapp: whatsapp || '',
         amount: price,
         status: 'pending',
         created_at: admin.database.ServerValue.TIMESTAMP
