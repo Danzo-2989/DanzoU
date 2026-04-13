@@ -3,12 +3,13 @@
 @theme {
   --color-neo-green: var(--neo-green); 
   --color-neo-dark: var(--neo-dark); 
+  --color-neo-border: var(--neo-border);
   --color-neo-bg: var(--neo-bg); 
   --color-neo-surface: var(--neo-surface);
   
-  --shadow-neo: 6px 6px 0px 0px var(--color-neo-dark);
-  --shadow-neo-heavy: 12px 12px 0px 0px var(--color-neo-dark);
-  --shadow-neo-pressed: 0px 0px 0px 0px var(--color-neo-dark);
+  --shadow-neo: 6px 6px 0px 0px var(--color-neo-border);
+  --shadow-neo-heavy: 12px 12px 0px 0px var(--color-neo-border);
+  --shadow-neo-pressed: 0px 0px 0px 0px var(--color-neo-border);
 
   /* Animasi V4 Way */
   --animation-fade-in-up: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -29,20 +30,22 @@
   :root {
     --neo-green: #34d399;
     --neo-dark: #1e293b;
+    --neo-border: #1e293b;
     --neo-bg: #f8fafc;
     --neo-surface: #ffffff;
   }
   
   .dark {
     --neo-green: #34d399; /* Tetap hijau neon */
-    --neo-dark: #f8fafc; /* Invert jadi putih/abu terang */
+    --neo-dark: #f8fafc; /* Invert teks jadi terang */
+    --neo-border: #020617; /* Border dan shadow tetap hitam pekat */
     --neo-bg: #0f172a; /* Background hitam gelap */
     --neo-surface: #1e293b; /* Card jadi abu kegelapan */
   }
 
   body {
     background-color: var(--neo-bg);
-    background-image: radial-gradient(var(--neo-dark) 1px, transparent 1px);
+    background-image: radial-gradient(color-mix(in srgb, var(--neo-dark) 20%, transparent) 1px, transparent 1px);
     background-size: 24px 24px;
     color: var(--neo-dark);
     @apply font-sans antialiased transition-colors duration-300;
@@ -51,34 +54,34 @@
 
 @layer components {
   .neo-card {
-    @apply bg-neo-surface border-4 border-neo-dark shadow-neo p-6 transition-all duration-300 ease-out;
+    @apply bg-neo-surface border-4 border-neo-border shadow-neo p-6 transition-all duration-300 ease-out;
   }
   .neo-card:hover {
     @apply -translate-y-2 shadow-neo-heavy;
   }
   
   .neo-button {
-    @apply flex items-center justify-center gap-2 bg-neo-surface border-4 border-neo-dark shadow-neo px-6 py-3 font-black uppercase tracking-wider transition-all duration-200 ease-out cursor-pointer;
+    @apply flex items-center justify-center gap-2 bg-neo-surface border-4 border-neo-border shadow-neo px-6 py-3 font-black uppercase tracking-wider transition-all duration-200 ease-out cursor-pointer;
   }
   .neo-button:hover {
-    @apply -translate-y-1 shadow-[8px_8px_0px_0px_var(--color-neo-dark)];
+    @apply -translate-y-1 shadow-[8px_8px_0px_0px_var(--color-neo-border)];
   }
   .neo-button:active {
     @apply translate-x-[6px] translate-y-[6px] shadow-neo-pressed;
   }
   
   .neo-button-primary {
-    @apply flex items-center justify-center gap-2 bg-neo-green border-4 border-neo-dark shadow-neo px-6 py-3 font-black uppercase tracking-wider transition-all duration-200 ease-out cursor-pointer;
+    @apply flex items-center justify-center gap-2 bg-neo-green border-4 border-neo-border shadow-neo px-6 py-3 font-black uppercase tracking-wider transition-all duration-200 ease-out cursor-pointer;
   }
   .neo-button-primary:hover {
-    @apply -translate-y-1 shadow-[8px_8px_0px_0px_var(--color-neo-dark)] brightness-110;
+    @apply -translate-y-1 shadow-[8px_8px_0px_0px_var(--color-neo-border)] brightness-110;
   }
   .neo-button-primary:active {
     @apply translate-x-[6px] translate-y-[6px] shadow-neo-pressed brightness-100;
   }
 
   .neo-input {
-    @apply bg-neo-surface border-4 border-neo-dark p-4 font-medium transition-all duration-200 ease-out;
+    @apply bg-neo-surface border-4 border-neo-border p-4 font-medium transition-all duration-200 ease-out;
   }
   .neo-input:focus {
     @apply outline-none -translate-y-1 shadow-neo ring-4 ring-neo-green/30;
