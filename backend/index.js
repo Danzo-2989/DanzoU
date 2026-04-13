@@ -293,6 +293,41 @@ app.post("/admin/settings/emailTemplate", adminAuth, async (req, res) => {
   }
 });
 
+
+// --- ENDPOINT: Admin Edit Produk ---
+app.put("/admin/products/:id", adminAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.ref(`products/${id}`).update(req.body);
+    res.json({ success: true, message: "Produk berhasil diupdate" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// --- ENDPOINT: Admin Edit Sub Produk ---
+app.put("/admin/products/:productId/sub_products/:subId", adminAuth, async (req, res) => {
+  try {
+    const { productId, subId } = req.params;
+    await db.ref(`products/${productId}/sub_products/${subId}`).update(req.body);
+    res.json({ success: true, message: "Variasi berhasil diupdate" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// --- ENDPOINT: Admin Edit Stock Key ---
+app.put("/admin/stock/:subId/:keyId", adminAuth, async (req, res) => {
+  try {
+    const { subId, keyId } = req.params;
+    const { key } = req.body;
+    await db.ref(`stock/${subId}/${keyId}`).set(key);
+    res.json({ success: true, message: "Key berhasil diupdate" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // Export the Express app for Vercel
 module.exports = app;
 
