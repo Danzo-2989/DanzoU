@@ -13,6 +13,11 @@ function App() {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
+    // Cek tema 
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+
     onValue(ref(db, 'settings/announcement'), (snapshot) => {
       const data = snapshot.val();
       setAnnouncement(data);
@@ -42,7 +47,7 @@ function App() {
       {/* PENGUMUMAN POPUP */}
       {showModal && announcement && (
         <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 animate-fade-in">
-          <div className="relative w-full max-w-md border-4 border-neo-dark bg-white shadow-[8px_8px_0px_0px_#1e293b] flex flex-col">
+          <div className="relative w-full max-w-md border-4 border-neo-dark bg-neo-surface shadow-[8px_8px_0px_0px_var(--color-neo-dark)] flex flex-col">
             
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b-4 border-neo-dark bg-sky-300">
@@ -52,7 +57,7 @@ function App() {
               </span>
               <button
                 onClick={closeAnnouncement}
-                className="bg-white border-2 border-neo-dark p-1 hover:bg-red-400 transition-all shadow-[2px_2px_0_0_#1e293b]"
+                className="bg-neo-surface border-2 border-neo-dark p-1 hover:bg-red-400 transition-all shadow-[2px_2px_0_0_var(--color-neo-dark)]"
               >
                 <X size={18} strokeWidth={3} className="text-neo-dark" />
               </button>
@@ -66,7 +71,7 @@ function App() {
               
               <button
                 onClick={handleAction}
-                className="w-full text-sm md:text-base py-3 border-4 border-neo-dark font-black uppercase flex items-center justify-center gap-2 transition-all bg-neo-green hover:-translate-y-1 shadow-[4px_4px_0px_0px_#1e293b] active:translate-y-1 active:shadow-none"
+                className="w-full text-sm md:text-base py-3 border-4 border-neo-dark font-black uppercase flex items-center justify-center gap-2 transition-all bg-neo-green hover:-translate-y-1 shadow-[4px_4px_0px_0px_var(--color-neo-dark)] active:translate-y-1 active:shadow-none"
               >
                 {announcement.buttonText || 'TUTUP'}
               </button>
