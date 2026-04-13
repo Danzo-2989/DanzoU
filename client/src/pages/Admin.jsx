@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { ref, onValue } from 'firebase/database';
-import { LayoutDashboard, Plus, Package, Mail, ListPlus, ArrowLeft, Zap, Lock, Trash2, ChevronDown, ChevronUp, Key, Tag, Gamepad2, X, Pencil, Check, Save } from 'lucide-react';
+import { LayoutDashboard, Plus, Package, Mail, ListPlus, ArrowLeft, Zap, Lock, Trash2, ChevronDown, ChevronUp, Key, Tag, Gamepad2, X, Pencil, Check, Save, Megaphone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -10,6 +10,12 @@ function Admin() {
   const [products, setProducts] = useState({});
   const [stock, setStock] = useState({});
   const [emailTemplate, setEmailTemplate] = useState('');
+  const [announcement, setAnnouncement] = useState({
+    enabled: false,
+    message: '',
+    buttonText: '',
+    buttonUrl: ''
+  });
   const [newProduct, setNewProduct] = useState({ name: '', desc: '', image: '', tags: '', feature_media: '' });
   const [newSub, setNewSub] = useState({ productId: '', label: '', price: '' });
   const [bulkStock, setBulkStock] = useState({ subId: '', keys: '' });
@@ -28,6 +34,10 @@ function Admin() {
     onValue(ref(db, 'products'), (snapshot) => { setProducts(snapshot.val() || {}); });
     onValue(ref(db, 'stock'), (snapshot) => { setStock(snapshot.val() || {}); });
     onValue(ref(db, 'settings/emailTemplate'), (snapshot) => { setEmailTemplate(snapshot.val() || ''); });
+    onValue(ref(db, 'settings/announcement'), (snapshot) => {
+      const data = snapshot.val();
+      if (data) setAnnouncement(data);
+    });
   }, []);
 
   const addProduct = async (e) => {
@@ -138,6 +148,13 @@ function Admin() {
       await axios.post(`${backendUrl}/admin/settings/emailTemplate`, { template: emailTemplate }, { headers: { 'x-admin-password': auth.password }});
       alert('Template email berhasil disimpan!');
     } catch (err) { alert(err.response?.data?.message || 'Gagal simpan template'); }
+  };
+
+  const saveAnnouncement = async () => {
+    try {
+      await axios.post(`${backendUrl}/admin/settings/announcement`, announcement, { headers: { 'x-admin-password': auth.password }});
+      alert('Pengumuman website berhasil disimpan!');
+    } catch (err) { alert(err.response?.data?.message || 'Gagal simpan pengumuman'); }
   };
 
   const handleAuth = (e) => {
@@ -329,6 +346,35 @@ function Admin() {
             <textarea className="neo-input min-h-[140px]" placeholder="Hi buyer, here is your key: {stok_key}"
               value={emailTemplate} onChange={e => setEmailTemplate(e.target.value)}/>
             <button onClick={saveEmailTemplate} className="neo-button-primary w-fit">SIMPAN TEMPLATE</button>
+          </div>
+        </section>
+
+        {/* Pengumuman Website */}
+        <section className="neo-card flex flex-col gap-6 lg:col-span-2 animate-fade-in-up">
+          <h2 className="text-2xl font-black uppercase flex items-center gap-3 border-b-4 border-neo-dark pb-4">
+            <div className="bg-sky-300 border-4 border-neo-dark p-2"><Megaphone size={24} strokeWidth={3}/></div>
+            Pengumuman Website
+          </h2>
+          <div className="flex flex-col gap-4">
+            <label className="flex items-center gap-3 font-black uppercase cursor-pointer w-fit">
+              <input
+                type="checkbox"
+                checked={announcement.enabled}
+                onChange={e => setAnnouncement({...announcement, enabled: e.target.checked})}
+                className="w-5 h-5 accent-neo-dark"
+              />
+              Aktifkan Popup Pengumuman di Halaman Utama
+            </label>
+            <textarea className="neo-input min-h-[100px]" placeholder="Isi pesan popup pengumuman..."
+              value={announcement.message} onChange={e => setAnnouncement({...announcement, message: e.target.value})}/>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input className="neo-input" placeholder="Teks Tombol (Misal: Lanjut, Join Grup)"
+                value={announcement.buttonText} onChange={e => setAnnouncement({...announcement, buttonText: e.target.value})}/>
+              <input className="neo-input" placeholder="URL Tujuan Button (Opsional)"
+                value={announcement.buttonUrl} onChange={e => setAnnouncement({...announcement, buttonUrl: e.target.value})}/>
+            </div>
+            <p className="text-xs font-bold opacity-50">Kosongkan URL Tujuan jika tombol hanya berfungsi untuk menutup popup.</p>
+            <button onClick={saveAnnouncement} className="neo-button-primary w-fit mt-2">SIMPAN PENGUMUMAN</button>
           </div>
         </section>
 
