@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { ref, onValue } from 'firebase/database';
 import { useNavigate } from 'react-router-dom';
-import { Zap, CircleAlert, KeyRound, DollarSign, Lock, Clock, X, Play, Search } from 'lucide-react';
+import { Zap, CircleAlert, KeyRound, DollarSign, Lock, Clock, X, Play, Search, Moon, Sun } from 'lucide-react';
 
 function Home() {
   const [products, setProducts] = useState({});
@@ -10,12 +10,26 @@ function Home() {
   const [activeFilter, setActiveFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [previewProduct, setPreviewProduct] = useState(null); // { name, mediaUrl, mediaType }
+  const [isDark, setIsDark] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     onValue(ref(db, 'products'), (snapshot) => { setProducts(snapshot.val() || {}); });
     onValue(ref(db, 'stock'), (snapshot) => { setStock(snapshot.val() || {}); });
+    setIsDark(document.documentElement.classList.contains('dark'));
   }, []);
+
+  const toggleTheme = () => {
+    if (isDark) {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+      setIsDark(false);
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+      setIsDark(true);
+    }
+  };
 
   const allCategories = ['ALL', ...Array.from(
     new Set(Object.values(products).flatMap(p =>
@@ -70,24 +84,30 @@ function Home() {
     <div className="px-3 py-4 md:px-8 md:py-8 max-w-7xl mx-auto min-h-screen flex flex-col gap-6 md:gap-12">
 
       {/* ── HEADER ── */}
-      <header className="flex items-center gap-3 neo-card bg-white animate-fade-in-up py-3 px-4 md:py-6 md:px-6">
-        <div className="bg-neo-green border-4 border-neo-dark p-2 md:p-3 shadow-neo shrink-0">
-          <KeyRound size={24} className="text-neo-dark" strokeWidth={2.5}/>
+      <header className="flex items-center gap-3 neo-card bg-neo-surface animate-fade-in-up py-3 px-4 md:py-6 md:px-6 justify-between">
+        <div className="flex items-center gap-3">
+          <div className="bg-neo-green border-4 border-neo-dark p-2 md:p-3 shadow-neo shrink-0">
+            <KeyRound size={24} className="text-neo-dark" strokeWidth={2.5}/>
+          </div>
+          <div>
+            <h1 className="text-2xl md:text-5xl font-black uppercase tracking-tighter leading-none text-neo-dark">
+              {import.meta.env.VITE_STORE_NAME || 'KEYSTORE'}
+            </h1>
+            <p className="font-bold uppercase tracking-widest text-[10px] md:text-xs opacity-70 text-neo-dark">
+              {import.meta.env.VITE_STORE_SLOGAN || 'Premium License Market'}
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl md:text-5xl font-black uppercase tracking-tighter leading-none text-neo-dark">
-            {import.meta.env.VITE_STORE_NAME || 'KEYSTORE'}
-          </h1>
-          <p className="font-bold uppercase tracking-widest text-[10px] md:text-xs opacity-70">
-            {import.meta.env.VITE_STORE_SLOGAN || 'Premium License Market'}
-          </p>
-        </div>
+        <button onClick={toggleTheme} title="Toggle Dark/Light Mode"
+          className="bg-neo-surface border-4 border-neo-dark p-2 md:p-3 shadow-neo hover:-translate-y-1 hover:shadow-neo-heavy transition-all cursor-pointer">
+          {isDark ? <Sun size={24} className="text-neo-dark" strokeWidth={3}/> : <Moon size={24} className="text-neo-dark" strokeWidth={3}/>}
+        </button>
       </header>
 
       {/* ── PENCARIAN & FILTER KATEGORI ── */}
       <div className="flex flex-col md:flex-row gap-3 animate-fade-in-up">
         {/* Kolom Pencarian */}
-        <div className="flex bg-white border-4 border-neo-dark shadow-[3px_3px_0px_0px_#1e293b] flex-1 max-w-sm focus-within:-translate-y-1 focus-within:shadow-[4px_4px_0_0_#1e293b] transition-all h-10 md:h-12">
+        <div className="flex bg-neo-surface border-4 border-neo-dark shadow-[3px_3px_0px_0px_var(--color-neo-dark)] flex-1 max-w-sm focus-within:-translate-y-1 focus-within:shadow-[4px_4px_0_0_var(--color-neo-dark)] transition-all h-10 md:h-12">
           <div className="bg-neo-green px-3 border-r-4 border-neo-dark flex items-center justify-center text-neo-dark">
             <Search size={18} strokeWidth={3}/>
           </div>
@@ -110,7 +130,7 @@ function Home() {
                 className={`shrink-0 border-4 border-neo-dark px-3 py-1.5 md:px-5 md:py-1.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 h-10 md:h-12
                   ${activeFilter === cat
                     ? 'bg-neo-dark text-white shadow-none translate-x-0.5 translate-y-0.5'
-                    : 'bg-white hover:-translate-y-1 shadow-[3px_3px_0px_0px_#1e293b] hover:shadow-[4px_4px_0px_0px_#1e293b]'
+                    : 'bg-neo-surface hover:-translate-y-1 shadow-[3px_3px_0px_0px_var(--color-neo-dark)] hover:shadow-[4px_4px_0px_0px_var(--color-neo-dark)]'
                   }`}
               >
                 {cat}
@@ -126,7 +146,7 @@ function Home() {
           const firstTag = product.tags ? product.tags.split(',')[0].trim() : null;
           const hasMedia = !!(product.feature_media || product.image);
           return (
-            <div key={id} className="neo-card flex flex-col gap-2 md:gap-4 animate-fade-in-up bg-white p-3 md:p-6">
+            <div key={id} className="neo-card flex flex-col gap-2 md:gap-4 animate-fade-in-up bg-neo-surface p-3 md:p-6">
               {/* Gambar */}
               <div className="h-28 md:h-48 border-4 border-neo-dark bg-rose-100 flex items-center justify-center overflow-hidden relative font-black uppercase text-2xl">
                 {product.image ? (
@@ -190,7 +210,7 @@ function Home() {
       </div>
 
       {filteredProducts.length === 0 && (
-        <div className="neo-card text-center py-12 animate-fade-in-up flex flex-col items-center justify-center max-w-2xl mx-auto w-full bg-white text-neo-dark">
+        <div className="neo-card text-center py-12 animate-fade-in-up flex flex-col items-center justify-center max-w-2xl mx-auto w-full bg-neo-surface text-neo-dark">
           <div className="bg-neo-green p-3 border-4 border-neo-dark shadow-neo mb-4">
             <CircleAlert size={32} strokeWidth={2.5} />
           </div>
@@ -208,7 +228,7 @@ function Home() {
         <p className="font-black uppercase text-center text-xs md:text-sm tracking-[0.25em] opacity-50">BENEFIT BELI DI KAMI</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           {features.map((f, i) => (
-            <div key={i} className="neo-card bg-white flex flex-col items-center text-center gap-3 py-5 px-3 md:py-6 md:px-6">
+            <div key={i} className="neo-card bg-neo-surface flex flex-col items-center text-center gap-3 py-5 px-3 md:py-6 md:px-6">
               <div className={`${f.color} border-4 border-neo-dark p-3 shadow-neo`}>{f.icon}</div>
               <div>
                 <h3 className="font-black uppercase text-xs md:text-base leading-tight">{f.title}</h3>
@@ -241,16 +261,16 @@ function Home() {
       </div>
 
       {/* ── METODE PEMBAYARAN ── */}
-      <div className="neo-card bg-white animate-fade-in-up py-5 md:py-6 px-4 md:px-6">
+      <div className="neo-card bg-neo-surface animate-fade-in-up py-5 md:py-6 px-4 md:px-6">
         <p className="text-center font-black uppercase tracking-[0.25em] text-xs md:text-sm opacity-50 mb-5">
           ✦ METODE PEMBAYARAN RESMI ✦
         </p>
         <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4">
-          <div className="border-4 border-neo-dark px-3 md:px-5 py-2 md:py-3 shadow-[4px_4px_0px_0px_#1e293b] bg-white font-black text-sm md:text-lg flex items-center gap-1"><span>▣</span> QRIS</div>
-          <div className="border-4 border-neo-dark px-3 md:px-5 py-2 md:py-3 shadow-[4px_4px_0px_0px_#1e293b] bg-[#108EE9] text-white font-black text-sm md:text-lg">DANA</div>
-          <div className="border-4 border-neo-dark px-3 md:px-5 py-2 md:py-3 shadow-[4px_4px_0px_0px_#1e293b] bg-[#00AED6] text-white font-black text-sm md:text-lg">GoPay</div>
-          <div className="border-4 border-neo-dark px-3 md:px-5 py-2 md:py-3 shadow-[4px_4px_0px_0px_#1e293b] bg-[#4C3494] text-white font-black text-sm md:text-lg">OVO</div>
-          <div className="border-4 border-neo-dark px-3 md:px-5 py-2 md:py-3 shadow-[4px_4px_0px_0px_#1e293b] bg-[#EE4D2D] text-white font-black text-sm md:text-lg">ShopeePay</div>
+          <div className="border-4 border-neo-dark px-3 md:px-5 py-2 md:py-3 shadow-[4px_4px_0px_0px_var(--color-neo-dark)] bg-neo-surface font-black text-sm md:text-lg flex items-center gap-1"><span>▣</span> QRIS</div>
+          <div className="border-4 border-neo-dark px-3 md:px-5 py-2 md:py-3 shadow-[4px_4px_0px_0px_var(--color-neo-dark)] bg-[#108EE9] text-white font-black text-sm md:text-lg">DANA</div>
+          <div className="border-4 border-neo-dark px-3 md:px-5 py-2 md:py-3 shadow-[4px_4px_0px_0px_var(--color-neo-dark)] bg-[#00AED6] text-white font-black text-sm md:text-lg">GoPay</div>
+          <div className="border-4 border-neo-dark px-3 md:px-5 py-2 md:py-3 shadow-[4px_4px_0px_0px_var(--color-neo-dark)] bg-[#4C3494] text-white font-black text-sm md:text-lg">OVO</div>
+          <div className="border-4 border-neo-dark px-3 md:px-5 py-2 md:py-3 shadow-[4px_4px_0px_0px_var(--color-neo-dark)] bg-[#EE4D2D] text-white font-black text-sm md:text-lg">ShopeePay</div>
         </div>
       </div>
 

@@ -211,7 +211,7 @@ function Admin() {
       <div className="neo-card bg-neo-green mb-12 animate-fade-in-up flex items-center justify-center py-8">
         <h1 className="text-4xl md:text-6xl font-black uppercase flex items-center gap-4 text-center">
           <LayoutDashboard size={48} strokeWidth={3} className="hidden md:block text-neo-dark"/>
-          Control <span className="bg-white px-4 border-4 border-neo-dark mx-2">Center</span>
+          Control <span className="bg-neo-surface px-4 border-4 border-neo-dark mx-2">Center</span>
         </h1>
       </div>
 
@@ -246,7 +246,7 @@ function Admin() {
                 {PRESET_TAGS.map(tag => (
                   <button key={tag} type="button" onClick={() => toggleTag(tag)}
                     className={`border-2 border-neo-dark px-3 py-1 text-xs font-black uppercase transition-all
-                      ${isTagActive(tag) ? 'bg-neo-dark text-white' : 'bg-white hover:bg-pink-100 shadow-[2px_2px_0_0_#1e293b]'}`}>
+                      ${isTagActive(tag) ? 'bg-neo-dark text-white' : 'bg-neo-surface hover:bg-pink-100 shadow-[2px_2px_0_0_#1e293b]'}`}>
                     {tag}
                   </button>
                 ))}
@@ -402,7 +402,7 @@ function Admin() {
               <div key={pid} className="border-4 border-neo-dark shadow-[4px_4px_0px_0px_#1e293b]">
 
                 {/* Header Produk */}
-                <div className="flex items-center justify-between p-3 bg-white gap-2">
+                <div className="flex items-center justify-between p-3 bg-neo-surface gap-2">
                   <button onClick={() => setExpandedProduct(expandedProduct === pid ? null : pid)}
                     className="flex items-center gap-2 font-black uppercase text-base flex-1 text-left min-w-0">
                     {expandedProduct === pid ? <ChevronUp size={18} strokeWidth={3}/> : <ChevronDown size={18} strokeWidth={3}/>}
@@ -500,7 +500,7 @@ function Admin() {
                                   const keyStr = keyVal.key || keyVal;
                                   const isEditingThis = editingKey?.keyId === keyId;
                                   return (
-                                    <div key={keyId} className="flex items-center gap-2 bg-white border-2 border-neo-dark px-3 py-2 shadow-[2px_2px_0px_0px_#1e293b]">
+                                    <div key={keyId} className="flex items-center gap-2 bg-neo-surface border-2 border-neo-dark px-3 py-2 shadow-[2px_2px_0px_0px_#1e293b]">
                                       <Key size={12} strokeWidth={3} className="opacity-40 shrink-0"/>
                                       {isEditingThis ? (
                                         <>
@@ -552,7 +552,7 @@ function Admin() {
           <div className="flex flex-col gap-4 max-h-[400px] overflow-y-auto pr-2">
             {Object.keys(transactions).length === 0 && <p className="font-bold opacity-50 text-center py-4">Belum ada transaksi.</p>}
             {Object.entries(transactions).sort((a,b) => b[1].created_at - a[1].created_at).map(([tid, trx]) => (
-              <div key={tid} className="border-4 border-neo-dark bg-white shadow-[4px_4px_0_0_#1e293b] p-4 flex flex-col md:flex-row justify-between md:items-center gap-4">
+              <div key={tid} className="border-4 border-neo-dark bg-neo-surface shadow-[4px_4px_0_0_#1e293b] p-4 flex flex-col md:flex-row justify-between md:items-center gap-4">
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-2">
                     <span className="font-black uppercase text-sm md:text-base">{trx.product_name}</span>

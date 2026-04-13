@@ -101,7 +101,7 @@ function Checkout() {
           <ArrowLeft size={20} className="mr-2"/> Kembali
         </button>
 
-        <div className="neo-card bg-white animate-fade-in-up">
+        <div className="neo-card bg-neo-surface animate-fade-in-up">
 
           {/* ===== SUCCESS STATE ===== */}
           {status === 'success' ? (
@@ -129,7 +129,7 @@ function Checkout() {
                     className={`shrink-0 border-4 border-white p-3 transition-all duration-200 font-black
                       ${copied 
                         ? 'bg-neo-green text-neo-dark border-neo-green' 
-                        : 'bg-white text-neo-dark hover:-translate-y-1 hover:shadow-[4px_4px_0_0_rgba(255,255,255,0.5)]'
+                        : 'bg-neo-surface text-neo-dark hover:-translate-y-1 hover:shadow-[4px_4px_0_0_var(--color-neo-dark)]'
                       }`}
                     title="Copy key"
                   >
@@ -144,7 +144,7 @@ function Checkout() {
               </div>
 
               {/* Email info */}
-              <div className="w-full bg-indigo-50 border-4 border-neo-dark p-4 shadow-[4px_4px_0px_0px_#1e293b] text-sm font-bold text-center">
+              <div className="w-full bg-indigo-50 dark:bg-indigo-900 border-4 border-neo-dark p-4 shadow-[4px_4px_0px_0px_var(--color-neo-dark)] text-sm font-bold text-center">
                 <Mail size={16} className="inline mr-2 opacity-60"/>
                 Key juga dikirim ke: <span className="font-mono bg-neo-dark text-neo-green px-2 py-0.5 ml-1">{email}</span>
               </div>
@@ -170,7 +170,7 @@ function Checkout() {
               {status === 'pending' ? (
                 <div className="flex flex-col items-center gap-6 py-4 animate-fade-in-up">
                   <h2 className="text-2xl font-black uppercase tracking-tight text-neo-dark">Scan QRIS Untuk Bayar</h2>
-                  <div className="p-4 bg-white border-4 border-neo-dark shadow-neo-heavy flex flex-col gap-4">
+                  <div className="p-4 bg-neo-surface border-4 border-neo-dark shadow-neo-heavy flex flex-col gap-4">
                     <img src={paymentData.qris_image_url} alt="QRIS" className="w-64 h-64 object-contain mx-auto" />
                     
                     {paymentData.total_amount && (
@@ -217,7 +217,7 @@ function Checkout() {
                     />
                   </div>
 
-                  <div className="bg-orange-50 border-4 border-neo-dark p-4 flex gap-4 text-neo-dark shadow-[4px_4px_0px_0px_#1e293b]">
+                  <div className="bg-orange-50 dark:bg-orange-900 border-4 border-neo-dark p-4 flex gap-4 text-neo-dark shadow-[4px_4px_0px_0px_var(--color-neo-dark)]">
                     <AlertTriangle className="shrink-0 text-orange-500" size={24} />
                     <p className="text-xs font-bold uppercase opacity-80 mt-1">
                       Barang digital tidak dapat direfund. Membeli = setuju.
