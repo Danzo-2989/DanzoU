@@ -560,7 +560,10 @@ function Admin() {
                       {trx.status}
                     </span>
                   </div>
-                  <p className="font-bold text-xs opacity-60">📧 {trx.buyer_email}</p>
+                  <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-4 font-bold text-xs opacity-60">
+                    <p>📧 {trx.buyer_email}</p>
+                    {trx.buyer_whatsapp && <p>📱 {trx.buyer_whatsapp}</p>}
+                  </div>
                   <p className="font-bold text-xs opacity-60">💰 Rp {trx.amount?.toLocaleString('id-ID')} | 🕒 {new Date(trx.created_at).toLocaleString('id-ID')}</p>
                   {trx.key_delivered && (
                     <p className="font-mono text-xs mt-1 bg-gray-100 border-2 border-neo-border px-2 py-1 select-all break-all text-neo-dark w-fit">

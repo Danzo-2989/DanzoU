@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import { ref, onValue } from 'firebase/database';
 import axios from 'axios';
-import { ArrowLeft, Wallet, Loader2, CheckCircle2, Mail, AlertTriangle, Copy, Check, Key } from 'lucide-react';
+import { ArrowLeft, Wallet, Loader2, CheckCircle2, Mail, AlertTriangle, Copy, Check, Key, MessageCircle } from 'lucide-react';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
@@ -14,6 +14,7 @@ function Checkout() {
   const [subProduct, setSubProduct] = useState(null);
   const [product, setProduct] = useState(null);
   const [email, setEmail] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
   const [loading, setLoading] = useState(false);
   const [paymentData, setPaymentData] = useState(null);
   const [status, setStatus] = useState('idle');
@@ -63,6 +64,7 @@ function Checkout() {
       const res = await axios.post(`${API_BASE_URL}/checkout`, {
         subProductId,
         email,
+        whatsapp,
         price: subProduct.price,
         productName: `${product.name} - ${subProduct.label}`
       });
@@ -214,6 +216,19 @@ function Checkout() {
                       value={email}
                       onChange={e => setEmail(e.target.value)}
                       required
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-3">
+                    <label className="font-black flex items-center gap-2 bg-yellow-300 text-slate-900 border-4 border-neo-border w-fit px-4 py-2 shadow-neo ">
+                      <MessageCircle size={18} /> NOMOR WHATSAPP (OPSIONAL)
+                    </label>
+                    <input 
+                      type="text" 
+                      className="neo-input text-lg text-neo-dark" 
+                      placeholder="contoh: 081234567890"
+                      value={whatsapp}
+                      onChange={e => setWhatsapp(e.target.value)}
                     />
                   </div>
 
