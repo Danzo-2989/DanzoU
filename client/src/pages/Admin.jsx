@@ -10,7 +10,7 @@ function Admin() {
   const [products, setProducts] = useState({});
   const [stock, setStock] = useState({});
   const [emailTemplate, setEmailTemplate] = useState('');
-  const [newProduct, setNewProduct] = useState({ name: '', desc: '', image: '', tags: '' });
+  const [newProduct, setNewProduct] = useState({ name: '', desc: '', image: '', tags: '', feature_media: '' });
   const [newSub, setNewSub] = useState({ productId: '', label: '', price: '' });
   const [bulkStock, setBulkStock] = useState({ subId: '', keys: '' });
   const [auth, setAuth] = useState({ isAuthed: false, password: '' });
@@ -33,7 +33,7 @@ function Admin() {
     e.preventDefault();
     try {
       await axios.post(`${backendUrl}/admin/products`, newProduct, { headers: { 'x-admin-password': auth.password }});
-      setNewProduct({ name: '', desc: '', image: '', tags: '' });
+      setNewProduct({ name: '', desc: '', image: '', tags: '', feature_media: '' });
       alert('Produk berhasil ditambahkan!');
     } catch (err) { alert(err.response?.data?.message || 'Gagal tambah produk'); }
   };
@@ -194,6 +194,16 @@ function Admin() {
               className="neo-input" placeholder="URL Gambar (Opsional)"
               value={newProduct.image} onChange={e => setNewProduct({...newProduct, image: e.target.value})}
             />
+            <div className="flex flex-col gap-2">
+              <label className="font-black uppercase text-sm flex items-center gap-2 bg-red-200 border-2 border-neo-dark w-fit px-3 py-1 shadow-[2px_2px_0_0_#1e293b]">
+                🎬 URL Feature (Gambar/Video)
+              </label>
+              <input
+                className="neo-input text-sm" placeholder="URL gambar atau YouTube (https://youtube.com/watch?v=...)"
+                value={newProduct.feature_media} onChange={e => setNewProduct({...newProduct, feature_media: e.target.value})}
+              />
+              <p className="text-xs font-bold opacity-50">Tampil saat pembeli klik "SEE FEATURES" di halaman toko</p>
+            </div>
 
             {/* Tags */}
             <div className="flex flex-col gap-2">
