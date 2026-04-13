@@ -39,7 +39,7 @@ function Product() {
     windows: 'bg-blue-300', mac: 'bg-gray-300', free: 'bg-yellow-300',
     premium: 'bg-orange-300', vip: 'bg-pink-300',
   };
-  const getTagColor = (tag) => tagColors[tag.toLowerCase()] || 'bg-neo-green';
+  const getTagColor = (tag) => tagColors[tag.toLowerCase()] || 'bg-neo-green text-slate-900';
 
   return (
     <div className="px-3 py-4 md:p-8 max-w-4xl mx-auto min-h-screen pb-16 flex flex-col gap-4 md:gap-8">
@@ -48,10 +48,10 @@ function Product() {
         <ArrowLeft size={16} className="mr-1" strokeWidth={3}/> Kembali
       </button>
 
-      <div className="neo-card bg-white animate-fade-in-up p-0 overflow-hidden flex flex-col md:flex-row border-4 border-neo-dark shadow-[6px_6px_0px_0px_#1e293b] md:shadow-[8px_8px_0px_0px_#1e293b]">
+      <div className="neo-card bg-neo-surface animate-fade-in-up p-0 overflow-hidden flex flex-col md:flex-row border-4 border-neo-border shadow-[6px_6px_0px_0px_var(--color-neo-border)] md:shadow-[8px_8px_0px_0px_var(--color-neo-border)]">
 
         {/* Gambar */}
-        <div className="md:w-2/5 w-full h-48 md:h-auto border-b-4 md:border-b-0 md:border-r-4 border-neo-dark relative overflow-hidden bg-rose-100 flex items-center justify-center">
+        <div className="md:w-2/5 w-full h-48 md:h-auto border-b-4 md:border-b-0 md:border-r-4 border-neo-border relative overflow-hidden bg-rose-100 flex items-center justify-center">
           {product.image ? (
             <>
               <div className="absolute inset-0 bg-cover bg-center blur-lg opacity-40 scale-110 grayscale" style={{ backgroundImage: `url(${product.image})` }}/>
@@ -73,7 +73,7 @@ function Product() {
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {tags.map((tag, i) => (
-                  <span key={i} className={`${getTagColor(tag)} border-2 border-neo-dark px-2 py-0.5 text-[10px] md:text-xs font-black uppercase shadow-[2px_2px_0px_0px_#1e293b]`}>
+                  <span key={i} className={`${getTagColor(tag)} border-2 border-neo-border px-2 py-0.5 text-[10px] md:text-xs font-black uppercase shadow-[2px_2px_0px_0px_var(--color-neo-border)]`}>
                     {tag}
                   </span>
                 ))}
@@ -90,14 +90,14 @@ function Product() {
           {/* Pilih Game */}
           {gameVariants.length > 0 && (
             <div className="flex flex-col gap-2">
-              <h3 className="font-black uppercase text-xs border-2 border-neo-dark bg-yellow-300 w-fit px-2 py-1 shadow-[2px_2px_0px_0px_#1e293b] flex items-center gap-1">
+              <h3 className="font-black uppercase text-xs border-2 border-neo-border bg-yellow-300 w-fit px-2 py-1 shadow-[2px_2px_0px_0px_var(--color-neo-border)] flex items-center gap-1">
                 <Gamepad2 size={12} strokeWidth={3}/> Pilih Game:
               </h3>
               <div className="flex flex-wrap gap-1.5">
                 {gameVariants.map(([gid, game]) => (
                   <button key={gid} onClick={() => setSelectedGame(gid)}
-                    className={`border-4 border-neo-dark px-3 py-1.5 font-black uppercase text-xs transition-all
-                      ${selectedGame === gid ? 'bg-neo-dark text-white shadow-none' : 'bg-white hover:-translate-y-0.5 shadow-[3px_3px_0px_0px_#1e293b]'}`}>
+                    className={`border-4 border-neo-border px-3 py-1.5 font-black uppercase text-xs transition-all
+                      ${selectedGame === gid ? 'bg-neo-dark text-neo-surface shadow-none' : 'bg-neo-surface hover:-translate-y-0.5 shadow-[3px_3px_0px_0px_var(--color-neo-border)]'}`}>
                     {game.name}
                   </button>
                 ))}
@@ -112,7 +112,7 @@ function Product() {
 
           {/* Pilih Variasi */}
           <div className="flex flex-col gap-2">
-            <h3 className="font-black uppercase text-xs border-2 border-neo-dark bg-neo-green w-fit px-2 py-1 shadow-[2px_2px_0px_0px_#1e293b]">
+            <h3 className="font-black uppercase text-xs border-2 border-neo-border bg-neo-green text-slate-900 w-fit px-2 py-1 shadow-[2px_2px_0px_0px_var(--color-neo-border)]">
               Pilih Variasi:
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-2 gap-2">
@@ -122,15 +122,15 @@ function Product() {
                 const isSelected = selectedSub === sid;
                 return (
                   <button key={sid} disabled={!isAvailable} onClick={() => setSelectedSub(sid)}
-                    className={`relative flex flex-col items-start p-2 md:p-3 border-4 border-neo-dark font-bold transition-all text-left
+                    className={`relative flex flex-col items-start p-2 md:p-3 border-4 border-neo-border font-bold transition-all text-left
                       ${!isAvailable ? 'bg-gray-200 cursor-not-allowed opacity-60 grayscale' : ''}
-                      ${isAvailable && !isSelected ? 'bg-white hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_#1e293b]' : ''}
-                      ${isSelected ? 'bg-neo-dark text-white outline outline-4 outline-neo-green outline-offset-[-4px]' : ''}`}>
+                      ${isAvailable && !isSelected ? 'bg-neo-surface hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_0px_var(--color-neo-border)]' : ''}
+                      ${isSelected ? 'bg-neo-dark text-neo-surface outline outline-4 outline-neo-green outline-offset-[-4px]' : ''}`}>
                     <span className="w-full text-xs md:text-base font-black border-b-2 border-current pb-1 mb-1 truncate">{sub.label}</span>
                     <span className={`text-xs ${isSelected ? 'text-neo-green' : ''}`}>Rp {sub.price.toLocaleString()}</span>
                     {isAvailable
-                      ? <span className={`text-[9px] mt-1 uppercase px-1.5 py-0.5 border-2 border-current font-black ${isSelected ? 'bg-white text-neo-dark' : 'bg-neo-green'}`}>Sisa {count}</span>
-                      : <span className="text-[9px] mt-1 uppercase bg-neo-dark text-white px-1.5 py-0.5 border-2 border-neo-dark font-black">Habis</span>
+                      ? <span className={`text-[9px] mt-1 uppercase px-1.5 py-0.5 border-2 border-current font-black ${isSelected ? 'bg-neo-surface text-neo-dark' : 'bg-neo-green text-slate-900'}`}>Sisa {count}</span>
+                      : <span className="text-[9px] mt-1 uppercase bg-neo-dark text-neo-surface px-1.5 py-0.5 border-2 border-neo-border font-black">Habis</span>
                     }
                     {isSelected && <Check size={16} className="absolute right-1.5 top-2 text-neo-green" strokeWidth={4}/>}
                   </button>
@@ -143,8 +143,8 @@ function Product() {
           <button
             onClick={() => { if (selectedSub) navigate(`/checkout/${selectedSub}`); }}
             disabled={!selectedSub}
-            className={`w-full text-sm md:text-xl py-3 md:py-4 border-4 border-neo-dark font-black uppercase flex items-center justify-center gap-2 transition-all mt-auto
-              ${selectedSub ? 'bg-neo-green hover:-translate-y-1 shadow-[4px_4px_0px_0px_#1e293b] active:translate-y-1 active:shadow-none' : 'bg-gray-300 opacity-60 cursor-not-allowed'}`}
+            className={`w-full text-sm md:text-xl py-3 md:py-4 border-4 border-neo-border font-black uppercase flex items-center justify-center gap-2 transition-all mt-auto
+              ${selectedSub ? 'bg-neo-green text-slate-900 hover:-translate-y-1 shadow-[4px_4px_0px_0px_var(--color-neo-border)] active:translate-y-1 active:shadow-none' : 'bg-gray-300 opacity-60 cursor-not-allowed'}`}
           >
             <ShoppingCart size={18} strokeWidth={3}/>
             Lanjut Beli & Isi Email
