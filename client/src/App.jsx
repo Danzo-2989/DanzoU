@@ -47,19 +47,19 @@ function App() {
       {/* PENGUMUMAN POPUP */}
       {showModal && announcement && (
         <div className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 animate-fade-in">
-          <div className="relative w-full max-w-md border-4 border-neo-dark bg-neo-surface shadow-[8px_8px_0px_0px_var(--color-neo-dark)] flex flex-col">
+          <div className="relative w-full max-w-md border-4 border-neo-border bg-neo-surface shadow-[8px_8px_0px_0px_var(--color-neo-border)] flex flex-col">
             
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b-4 border-neo-dark bg-sky-300">
+            <div className="flex items-center justify-between px-4 py-3 border-b-4 border-neo-border bg-neo-surface">
               <span className="font-black uppercase text-sm tracking-widest flex items-center gap-2 text-neo-dark">
                 <Megaphone size={18} strokeWidth={3}/>
                 PENGUMUMAN
               </span>
               <button
                 onClick={closeAnnouncement}
-                className="bg-neo-surface border-2 border-neo-dark p-1 hover:bg-red-400 transition-all shadow-[2px_2px_0_0_var(--color-neo-dark)]"
+                className="bg-neo-surface border-2 border-neo-border p-1 hover:bg-red-400 hover:text-slate-900 transition-all shadow-[2px_2px_0_0_var(--color-neo-border)]"
               >
-                <X size={18} strokeWidth={3} className="text-neo-dark" />
+                <X size={18} strokeWidth={3} className="text-neo-dark hover:text-slate-900" />
               </button>
             </div>
 
@@ -71,7 +71,7 @@ function App() {
               
               <button
                 onClick={handleAction}
-                className="w-full text-sm md:text-base py-3 border-4 border-neo-dark font-black uppercase flex items-center justify-center gap-2 transition-all bg-neo-green hover:-translate-y-1 shadow-[4px_4px_0px_0px_var(--color-neo-dark)] active:translate-y-1 active:shadow-none"
+                className="w-full text-sm md:text-base py-3 border-4 border-neo-border font-black uppercase flex items-center justify-center gap-2 transition-all bg-neo-green text-slate-900 hover:-translate-y-1 shadow-[4px_4px_0px_0px_var(--color-neo-border)] active:translate-y-1 active:shadow-none"
               >
                 {announcement.buttonText || 'TUTUP'}
               </button>
