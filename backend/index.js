@@ -339,6 +339,31 @@ app.post("/admin/settings/announcement", adminAuth, async (req, res) => {
   }
 });
 
+// --- ENDPOINT: Admin Resend Key ---
+app.post("/admin/transactions/:trx_id/resend", adminAuth, async (req, res) => {
+  try {
+    const { trx_id } = req.params;
+    const trxSnap = await db.ref(`transactions/${trx_id}`).get();
+    if (!trxSnap.exists()) {
+      return res.status(404).json({ success: false, message: "Transaksi tidak ditemukan" });
+    }
+    const trx = trxSnap.val();
+    if (trx.status !== 'success' || !trx.key_delivered) {
+      return res.status(400).json({ success: false, message: "Transaksi belum sukses atau key belum terkirim" });
+    }
+
+    const templateSnap = await db.ref('settings/emailTemplate').get();
+    let template = templateSnap.val() || "Terima kasih, berikut key anda: {stok_key}";
+    const finalMessage = template.replace("{stok_key}", trx.key_delivered);
+
+    await sendEmail(trx.buyer_email, `[RESEND] LICENSE KEY: ${trx.product_name}`, finalMessage);
+    
+    res.json({ success: true, message: "Email berhasil dikirim ulang ke " + trx.buyer_email });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // Export the Express app for Vercel
 module.exports = app;
 
