@@ -328,6 +328,17 @@ app.put("/admin/stock/:subId/:keyId", adminAuth, async (req, res) => {
   }
 });
 
+// --- ENDPOINT: Admin Simpan Pengumuman Website ---
+app.post("/admin/settings/announcement", adminAuth, async (req, res) => {
+  try {
+    const data = req.body; // { enabled, message, buttonText, buttonUrl }
+    await db.ref('settings/announcement').set(data);
+    res.json({ success: true, message: "Pengumuman website berhasil disimpan" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // Export the Express app for Vercel
 module.exports = app;
 
