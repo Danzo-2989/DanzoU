@@ -2,10 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const files = [
-  path.join(__dirname, 'client/src/App.jsx'),
-  path.join(__dirname, 'client/src/pages/Home.jsx'),
-  path.join(__dirname, 'client/src/pages/Admin.jsx'),
-  path.join(__dirname, 'client/src/pages/Checkout.jsx')
+  path.join(__dirname, 'client/src/pages/Product.jsx')
 ];
 
 files.forEach(f => {
