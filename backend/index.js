@@ -54,7 +54,7 @@ async function sendEmail(to, subject, text) {
 
 // --- ENDPOINT: Create Checkout ---
 app.post("/checkout", async (req, res) => {
-  const { subProductId, email, whatsapp, price, productName } = req.body;
+  const { subProductId, productId, email, whatsapp, price, productName } = req.body;
 
   try {
     const reference_id = `TRX-${Date.now()}`;
@@ -75,6 +75,7 @@ app.post("/checkout", async (req, res) => {
       await db.ref(`transactions/${trxData.payinaja_trx_id}`).set({
         trx_id: trxData.payinaja_trx_id,
         merchant_ref: reference_id,
+        product_id: productId || null,
         sub_product_id: subProductId,
         product_name: productName,
         buyer_email: email,
@@ -145,7 +146,23 @@ app.get("/status/:trx_id", async (req, res) => {
           const templateSnap = await db.ref('settings/emailTemplate').get();
           let template = templateSnap.val() || "Terima kasih, berikut key anda: {stok_key}";
           
-          const finalMessage = template.replace("{stok_key}", actualKey);
+          let finalMessage = template.replace("{stok_key}", actualKey);
+
+          // C.2. Fetch product download_url if exists
+          let productDownloadUrl = '';
+          if (trx.product_id) {
+            const prodSnap = await db.ref(`products/${trx.product_id}`).get();
+            if (prodSnap.exists() && prodSnap.val().download_url) {
+              productDownloadUrl = prodSnap.val().download_url;
+              if (template.includes('{download_url}')) {
+                finalMessage = finalMessage.replace("{download_url}", productDownloadUrl);
+              } else {
+                finalMessage += `\n\nLink Download Aplikasi: ${productDownloadUrl}`;
+              }
+            } else {
+              finalMessage = finalMessage.replace("{download_url}", "");
+            }
+          }
 
           // D. Kirim Email Ke Buyer
           await sendEmail(trx.buyer_email, `LICENSE KEY: ${trx.product_name}`, finalMessage);
@@ -158,7 +175,7 @@ app.get("/status/:trx_id", async (req, res) => {
           // F. Update Status di DB
           await trxRef.update({ status: 'success', key_delivered: actualKey });
           
-          return res.json({ status: 'success', message: "Order fulfilled!", key: actualKey });
+          return res.json({ status: 'success', message: "Order fulfilled!", key: actualKey, download_url: productDownloadUrl });
         } else {
           // Kasus Stok Habis Mendadak
           return res.json({ status: 'out_of_stock', message: "Payment success but stock is empty! Contact admin." });
