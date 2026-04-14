@@ -141,6 +141,10 @@ app.get("/status/:trx_id", async (req, res) => {
 
           // B. Hapus key dari stok (biar gak kepake orang lain)
           await db.ref(`stock/${trx.sub_product_id}/${keyId}`).remove();
+          
+          // Kurangi stock_counts
+          const countRef = db.ref(`stock_counts/${trx.sub_product_id}`);
+          await countRef.transaction(c => (c || 0) > 0 ? c - 1 : 0);
 
           // C. Ambil Email Template dari Settings
           const templateSnap = await db.ref('settings/emailTemplate').get();
@@ -237,6 +241,11 @@ app.post("/admin/stock/:subId", adminAuth, async (req, res) => {
       const newKeyRef = stockRef.push();
       await newKeyRef.set(key);
     }
+    
+    // Update stock_counts
+    const countRef = db.ref(`stock_counts/${subId}`);
+    await countRef.transaction(c => (c || 0) + keys.length);
+
     res.json({ success: true, message: `${keys.length} keys berhasil ditambahkan` });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -277,6 +286,7 @@ app.delete("/admin/products/:id", adminAuth, async (req, res) => {
       const subIds = Object.keys(prodSnap.val());
       for (const subId of subIds) {
         await db.ref(`stock/${subId}`).remove();
+        await db.ref(`stock_counts/${subId}`).remove();
       }
     }
     await db.ref(`products/${id}`).remove();
@@ -292,6 +302,7 @@ app.delete("/admin/products/:productId/sub_products/:subId", adminAuth, async (r
     const { productId, subId } = req.params;
     await db.ref(`products/${productId}/sub_products/${subId}`).remove();
     await db.ref(`stock/${subId}`).remove();
+    await db.ref(`stock_counts/${subId}`).remove();
     res.json({ success: true, message: "Variasi berhasil dihapus" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -303,6 +314,8 @@ app.delete("/admin/stock/:subId/:keyId", adminAuth, async (req, res) => {
   try {
     const { subId, keyId } = req.params;
     await db.ref(`stock/${subId}/${keyId}`).remove();
+    const countRef = db.ref(`stock_counts/${subId}`);
+    await countRef.transaction(c => (c || 0) > 0 ? c - 1 : 0);
     res.json({ success: true, message: "Key berhasil dihapus" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -386,6 +399,40 @@ app.post("/admin/transactions/:trx_id/resend", adminAuth, async (req, res) => {
     await sendEmail(trx.buyer_email, `[RESEND] LICENSE KEY: ${trx.product_name}`, finalMessage);
     
     res.json({ success: true, message: "Email berhasil dikirim ulang ke " + trx.buyer_email });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// --- NEW PROTECTED ADMIN ENDPOINTS ---
+app.get("/admin/transactions", adminAuth, async (req, res) => {
+  try {
+    const snap = await db.ref("transactions").get();
+    res.json({ success: true, transactions: snap.val() || {} });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+app.get("/admin/stock", adminAuth, async (req, res) => {
+  try {
+    const snap = await db.ref("stock").get();
+    res.json({ success: true, stock: snap.val() || {} });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+app.post("/admin/sync_stock_counts", adminAuth, async (req, res) => {
+  try {
+    const snap = await db.ref("stock").get();
+    const stock = snap.val() || {};
+    const counts = {};
+    for (let subId in stock) {
+      counts[subId] = Object.keys(stock[subId]).length;
+    }
+    await db.ref("stock_counts").set(counts);
+    res.json({ success: true, message: "Stock counts berhasil disinkronisasi!", counts });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
