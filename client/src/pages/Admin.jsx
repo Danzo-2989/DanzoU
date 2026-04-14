@@ -32,10 +32,25 @@ function Admin() {
 
   const backendUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
+  const fetchSecureData = async (pwd = auth.password) => {
+    try {
+      const tRes = await axios.get(`${backendUrl}/admin/transactions`, { headers: { 'x-admin-password': pwd }});
+      setTransactions(tRes.data.transactions || {});
+      const sRes = await axios.get(`${backendUrl}/admin/stock`, { headers: { 'x-admin-password': pwd }});
+      setStock(sRes.data.stock || {});
+    } catch (e) { console.error('Fetch error:', e); }
+  };
+
+  const syncStockCounts = async () => {
+    if(!confirm("Sinkronisasi semua angka stok dengan kunci asli? Gunakan jika hitungan Sisa Stok tidak akurat.")) return;
+    try {
+      await axios.post(`${backendUrl}/admin/sync_stock_counts`, {}, { headers: { 'x-admin-password': auth.password }});
+      alert('Berhasil disinkronisasi!');
+    } catch (e) { alert('Gagal: ' + e.message); }
+  };
+
   useEffect(() => {
     onValue(ref(db, 'products'), (snapshot) => { setProducts(snapshot.val() || {}); });
-    onValue(ref(db, 'stock'), (snapshot) => { setStock(snapshot.val() || {}); });
-    onValue(ref(db, 'transactions'), (snapshot) => { setTransactions(snapshot.val() || {}); });
     onValue(ref(db, 'settings/emailTemplate'), (snapshot) => { setEmailTemplate(snapshot.val() || ''); });
     onValue(ref(db, 'settings/announcement'), (snapshot) => {
       const data = snapshot.val();
@@ -82,6 +97,7 @@ function Admin() {
     try {
       await axios.post(`${backendUrl}/admin/stock/${bulkStock.subId}`, { keys: keysArray }, { headers: { 'x-admin-password': auth.password }});
       setBulkStock({ subId: '', keys: '' });
+      await fetchSecureData(auth.password);
       alert(`Sukses menambahkan ${keysArray.length} key!`);
     } catch (err) { alert(err.response?.data?.message || 'Gagal tambah stok'); }
   };
@@ -97,6 +113,7 @@ function Admin() {
     if (!confirm(`Hapus variasi "${label}"?`)) return;
     try {
       await axios.delete(`${backendUrl}/admin/products/${productId}/sub_products/${subId}`, { headers: { 'x-admin-password': auth.password }});
+      await fetchSecureData(auth.password);
     } catch (err) { alert(err.response?.data?.message || 'Gagal hapus variasi'); }
   };
 
@@ -104,6 +121,7 @@ function Admin() {
     if (!confirm(`Hapus key "${keyValue}"?`)) return;
     try {
       await axios.delete(`${backendUrl}/admin/stock/${subId}/${keyId}`, { headers: { 'x-admin-password': auth.password }});
+      await fetchSecureData(auth.password);
     } catch (err) { alert(err.response?.data?.message || 'Gagal hapus key'); }
   };
 
@@ -143,6 +161,7 @@ function Admin() {
         { headers: { 'x-admin-password': auth.password }}
       );
       setEditingKey(null);
+      await fetchSecureData(auth.password);
     } catch (err) { alert(err.response?.data?.message || 'Gagal update key'); }
   };
 
@@ -174,6 +193,7 @@ function Admin() {
       const res = await axios.post(`${backendUrl}/admin/login`, { password: auth.password });
       if (res.data.success) {
         setAuth({ ...auth, isAuthed: true });
+        await fetchSecureData(auth.password);
       }
     } catch (err) {
       alert(err.response?.data?.message || 'Password salah!');
@@ -216,11 +236,19 @@ function Admin() {
         <ArrowLeft size={20} strokeWidth={3} className="mr-2"/> Kembali
       </button>
 
-      <div className="neo-card bg-neo-green text-slate-900 mb-12 animate-fade-in-up flex items-center justify-center py-8">
+      <div className="neo-card bg-neo-green text-slate-900 mb-12 animate-fade-in-up flex flex-col items-center justify-center py-8 gap-4">
         <h1 className="text-4xl md:text-6xl font-black uppercase flex items-center gap-4 text-center">
           <LayoutDashboard size={48} strokeWidth={3} className="hidden md:block text-neo-dark"/>
           Control <span className="bg-neo-surface px-4 border-4 border-neo-border mx-2">Center</span>
         </h1>
+        <div className="flex gap-4">
+          <button onClick={() => fetchSecureData()} className="neo-button bg-neo-surface text-neo-dark border-4 border-neo-border shadow-neo py-2 px-4 hover:-translate-y-1 font-black text-sm">
+            ⟳ Segarkan Data
+          </button>
+          <button onClick={syncStockCounts} className="neo-button bg-pink-300 text-slate-900 border-4 border-neo-border shadow-neo py-2 px-4 hover:-translate-y-1 font-black text-sm">
+            ⚡ Sync Hitungan Stok
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

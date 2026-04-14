@@ -14,7 +14,7 @@ function Product() {
 
   useEffect(() => {
     onValue(ref(db, `products/${id}`), (snapshot) => { setProduct(snapshot.val()); });
-    onValue(ref(db, 'stock'), (snapshot) => { setStock(snapshot.val() || {}); });
+    onValue(ref(db, 'stock_counts'), (snapshot) => { setStock(snapshot.val() || {}); });
   }, [id]);
 
   useEffect(() => {
@@ -24,8 +24,7 @@ function Product() {
   }, [product]);
 
   const getStockCount = (subId) => {
-    if (!stock[subId]) return 0;
-    return Object.keys(stock[subId]).length;
+    return stock[subId] || 0;
   };
 
   if (product === null) return <div className="min-h-screen flex items-center justify-center font-black uppercase text-xl">Memuat...</div>;
