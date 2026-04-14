@@ -185,6 +185,17 @@ app.get("/status/:trx_id", async (req, res) => {
           return res.json({ status: 'out_of_stock', message: "Payment success but stock is empty! Contact admin." });
         }
       }
+      // Jika status di DB sudah success sebelumnya (sudah fulfilled) -> kembalikan key yang sudah tersimpan
+      if (trx && trx.status === 'success') {
+        let productDownloadUrl = '';
+        if (trx.product_id) {
+          const prodSnap = await db.ref(`products/${trx.product_id}`).get();
+          if (prodSnap.exists() && prodSnap.val().download_url) {
+            productDownloadUrl = prodSnap.val().download_url;
+          }
+        }
+        return res.json({ status: 'success', key: trx.key_delivered || '', download_url: productDownloadUrl });
+      }
     }
 
     res.json({ status: currentStatus });
