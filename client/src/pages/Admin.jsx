@@ -18,7 +18,7 @@ function Admin() {
     buttonText: '',
     buttonUrl: ''
   });
-  const [newProduct, setNewProduct] = useState({ name: '', desc: '', image: '', tags: '', feature_media: '' });
+  const [newProduct, setNewProduct] = useState({ name: '', desc: '', image: '', tags: '', feature_media: '', download_url: '' });
   const [newSub, setNewSub] = useState({ productId: '', label: '', price: '' });
   const [bulkStock, setBulkStock] = useState({ subId: '', keys: '' });
   const [auth, setAuth] = useState({ isAuthed: false, password: '' });
@@ -47,7 +47,7 @@ function Admin() {
     e.preventDefault();
     try {
       await axios.post(`${backendUrl}/admin/products`, newProduct, { headers: { 'x-admin-password': auth.password }});
-      setNewProduct({ name: '', desc: '', image: '', tags: '', feature_media: '' });
+      setNewProduct({ name: '', desc: '', image: '', tags: '', feature_media: '', download_url: '' });
       alert('Produk berhasil ditambahkan!');
     } catch (err) { alert(err.response?.data?.message || 'Gagal tambah produk'); }
   };
@@ -247,6 +247,14 @@ function Admin() {
               <p className="text-xs font-bold opacity-50">Tampil saat pembeli klik "SEE FEATURES"</p>
             </div>
             <div className="flex flex-col gap-2">
+              <label className="font-black uppercase text-sm flex items-center gap-2 bg-sky-300 text-slate-900 border-2 border-neo-border w-fit px-3 py-1 shadow-[2px_2px_0_0_var(--color-neo-border)]">
+                📥 URL Download Aplikasi (Opsional)
+              </label>
+              <input className="neo-input text-sm" placeholder="Link Mediafire, GDrive, Mega, dll..."
+                value={newProduct.download_url} onChange={e => setNewProduct({...newProduct, download_url: e.target.value})}/>
+              <p className="text-xs font-bold opacity-50">Muncul di detail pesanan pembeli setelah lunas (Laman Checkout).</p>
+            </div>
+            <div className="flex flex-col gap-2">
               <label className="font-black uppercase text-sm flex items-center gap-2 bg-pink-200 border-2 border-neo-border w-fit px-3 py-1 shadow-[2px_2px_0_0_var(--color-neo-border)]">
                 <Tag size={14} strokeWidth={3}/> Tags Platform
               </label>
@@ -421,7 +429,7 @@ function Admin() {
                     <button
                       onClick={() => setEditingProduct({
                         id: pid,
-                        data: { name: product.name, desc: product.desc || '', image: product.image || '', tags: product.tags || '', feature_media: product.feature_media || '' }
+                        data: { name: product.name, desc: product.desc || '', image: product.image || '', tags: product.tags || '', feature_media: product.feature_media || '', download_url: product.download_url || '' }
                       })}
                       className="bg-yellow-300 border-4 border-neo-border p-1.5 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:-translate-y-1 transition-all">
                       <Pencil size={15} strokeWidth={3}/>
@@ -447,6 +455,8 @@ function Admin() {
                       onChange={e => setEditingProduct({...editingProduct, data: {...editingProduct.data, feature_media: e.target.value}})}/>
                     <input className="neo-input text-sm" placeholder="Tags (Android, iOS, PC...)" value={editingProduct.data.tags}
                       onChange={e => setEditingProduct({...editingProduct, data: {...editingProduct.data, tags: e.target.value}})}/>
+                    <input className="neo-input text-sm" placeholder="URL Download Aplikasi (Link Mediafire, dll)" value={editingProduct.data.download_url}
+                      onChange={e => setEditingProduct({...editingProduct, data: {...editingProduct.data, download_url: e.target.value}})}/>
                     <div className="flex gap-2">
                       <button onClick={saveEditProduct} className="neo-button-primary flex-1 text-sm py-2 flex items-center justify-center gap-1"><Save size={14}/> Simpan</button>
                       <button onClick={() => setEditingProduct(null)} className="neo-button flex-1 text-sm py-2 flex items-center justify-center gap-1"><X size={14}/> Batal</button>

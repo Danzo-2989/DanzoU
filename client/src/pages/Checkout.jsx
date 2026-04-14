@@ -26,7 +26,7 @@ function Checkout() {
       const allProducts = snapshot.val() || {};
       for (const pid in allProducts) {
         if (allProducts[pid].sub_products && allProducts[pid].sub_products[subProductId]) {
-          setProduct(allProducts[pid]);
+          setProduct({ ...allProducts[pid], id: pid });
           setSubProduct(allProducts[pid].sub_products[subProductId]);
           break;
         }
@@ -42,6 +42,7 @@ function Checkout() {
           const res = await axios.get(`${API_BASE_URL}/status/${paymentData.trx_id}`);
           if (res.data.status === 'success') {
             setLicenseKey(res.data.key || '');
+            setProduct(prev => ({ ...prev, download_url: res.data.download_url }));
             setStatus('success');
             clearInterval(interval);
           }
@@ -63,6 +64,7 @@ function Checkout() {
     try {
       const res = await axios.post(`${API_BASE_URL}/checkout`, {
         subProductId,
+        productId: product.id,
         email,
         whatsapp,
         price: subProduct.price,
@@ -144,6 +146,15 @@ function Checkout() {
                   </p>
                 )}
               </div>
+
+              {/* Download App */}
+              {product?.download_url && (
+                <div className="w-full flex justify-center text-slate-900 border-4 border-neo-border shadow-neo bg-sky-300 hover:bg-sky-400 hover:-translate-y-1 transition-all">
+                  <a href={product.download_url} target="_blank" rel="noopener noreferrer" className="font-black uppercase w-full flex items-center justify-center p-4">
+                    📥 DOWNLOAD APLIKASI DI SINI
+                  </a>
+                </div>
+              )}
 
               {/* Email info */}
               <div className="w-full bg-indigo-50 dark:bg-indigo-900 border-4 border-neo-border p-4 shadow-[4px_4px_0px_0px_var(--color-neo-border)] text-sm font-bold text-center">
