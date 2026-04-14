@@ -22,16 +22,22 @@ function Checkout() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    onValue(ref(db, 'products'), (snapshot) => {
+    // Unsubscribe setelah produk pertama kali dimuat agar state tidak di-reset Firebase
+    const unsubscribe = onValue(ref(db, 'products'), (snapshot) => {
       const allProducts = snapshot.val() || {};
       for (const pid in allProducts) {
         if (allProducts[pid].sub_products && allProducts[pid].sub_products[subProductId]) {
-          setProduct({ ...allProducts[pid], id: pid });
+          setProduct(prev => {
+            // Jangan overwrite jika sudah ada download_url dari polling
+            if (prev?.id === pid) return prev;
+            return { ...allProducts[pid], id: pid };
+          });
           setSubProduct(allProducts[pid].sub_products[subProductId]);
           break;
         }
       }
     });
+    return () => unsubscribe();
   }, [subProductId]);
 
   useEffect(() => {
@@ -41,8 +47,12 @@ function Checkout() {
         try {
           const res = await axios.get(`${API_BASE_URL}/status/${paymentData.trx_id}`);
           if (res.data.status === 'success') {
-            setLicenseKey(res.data.key || '');
-            setProduct(prev => ({ ...prev, download_url: res.data.download_url }));
+            const deliveredKey = res.data.key || '';
+            const downloadUrl = res.data.download_url || '';
+            // Simpan key ke state yang terlindungi
+            setLicenseKey(deliveredKey);
+            // Update download_url tanpa replace seluruh product object
+            setProduct(prev => ({ ...prev, download_url: downloadUrl }));
             setStatus('success');
             clearInterval(interval);
           }
