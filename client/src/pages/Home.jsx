@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { ref, onValue } from 'firebase/database';
 import { useNavigate } from 'react-router-dom';
-import { Zap, CircleAlert, KeyRound, DollarSign, Lock, Clock, X, Play, Search, Moon, Sun, MoreVertical, MessageCircle, Send, Youtube, Music } from 'lucide-react';
+import { Zap, CircleAlert, KeyRound, DollarSign, Lock, Clock, X, Play, Search, Moon, Sun, MoreVertical, MessageCircle, Send, Music } from 'lucide-react';
 
 function Home() {
   const [products, setProducts] = useState({});
@@ -410,7 +410,7 @@ function Home() {
                 <MessageCircle size={18} strokeWidth={3}/> Saluran WA
               </a>
               <a href="https://www.youtube.com/@danzoxiterz" target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-red-500 border-4 border-neo-border p-3 shadow-[4px_4px_0_0_var(--color-neo-border)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--color-neo-border)] active:translate-y-0 transition-all text-slate-900 font-black uppercase text-sm">
-                <Youtube size={18} strokeWidth={3}/> YouTube
+                <Play size={18} strokeWidth={3} fill="currentColor"/> YouTube
               </a>
               <a href="https://www.tiktok.com/@danzoxiterznew" target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-purple-400 border-4 border-neo-border p-3 shadow-[4px_4px_0_0_var(--color-neo-border)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--color-neo-border)] active:translate-y-0 transition-all text-slate-900 font-black uppercase text-sm">
                 <Music size={18} strokeWidth={3}/> TikTok
