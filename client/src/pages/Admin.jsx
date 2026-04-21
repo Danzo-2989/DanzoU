@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { ref, onValue } from 'firebase/database';
-import { LayoutDashboard, Plus, Package, Mail, ListPlus, ArrowLeft, Zap, Lock, Trash2, ChevronDown, ChevronUp, Key, Tag, Gamepad2, X, Pencil, Check, Save, Megaphone, Send } from 'lucide-react';
+import { LayoutDashboard, Plus, Package, Mail, ListPlus, ArrowLeft, ArrowUp, ArrowDown, Zap, Lock, Trash2, ChevronDown, ChevronUp, Key, Tag, Gamepad2, X, Pencil, Check, Save, Megaphone, Send } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -139,6 +139,28 @@ function Admin() {
       setEditingProduct(null);
       alert('Produk berhasil diupdate!');
     } catch (err) { alert(err.response?.data?.message || 'Gagal update produk'); }
+  };
+
+  const moveProduct = async (index, direction) => {
+    const sortedProducts = Object.entries(products).sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+    if (direction === 'up' && index > 0) {
+      const temp = sortedProducts[index][1].order;
+      sortedProducts[index][1].order = sortedProducts[index - 1][1].order;
+      sortedProducts[index - 1][1].order = temp;
+    } else if (direction === 'down' && index < sortedProducts.length - 1) {
+      const temp = sortedProducts[index][1].order;
+      sortedProducts[index][1].order = sortedProducts[index + 1][1].order;
+      sortedProducts[index + 1][1].order = temp;
+    } else {
+      return;
+    }
+
+    const updates = sortedProducts.map(([pid, p]) => ({ id: pid, order: p.order }));
+    try {
+      await axios.post(`${backendUrl}/admin/products/reorder`, { updates }, { headers: { 'x-admin-password': auth.password }});
+    } catch (err) {
+      alert(err.response?.data?.message || 'Gagal mengubah urutan');
+    }
   };
 
   const saveEditSub = async () => {
@@ -442,7 +464,7 @@ function Admin() {
           {Object.keys(products).length === 0 && <p className="font-bold opacity-50 text-center py-4">Belum ada produk.</p>}
 
           <div className="flex flex-col gap-4">
-            {Object.entries(products).map(([pid, product]) => (
+            {Object.entries(products).sort((a,b) => (a[1].order || 0) - (b[1].order || 0)).map(([pid, product], index, arr) => (
               <div key={pid} className="border-4 border-neo-border shadow-[4px_4px_0px_0px_var(--color-neo-border)]">
 
                 {/* Header Produk */}
@@ -454,6 +476,14 @@ function Admin() {
                     <span className="text-xs font-bold opacity-40 shrink-0 normal-case">({Object.keys(product.sub_products || {}).length} var)</span>
                   </button>
                   <div className="flex gap-2 shrink-0">
+                    <button onClick={() => moveProduct(index, 'up')} disabled={index === 0}
+                      className="bg-blue-300 border-4 border-neo-border p-1.5 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:-translate-y-1 transition-all disabled:opacity-50 disabled:hover:translate-y-0">
+                      <ArrowUp size={15} strokeWidth={3}/>
+                    </button>
+                    <button onClick={() => moveProduct(index, 'down')} disabled={index === arr.length - 1}
+                      className="bg-blue-300 border-4 border-neo-border p-1.5 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:-translate-y-1 transition-all disabled:opacity-50 disabled:hover:translate-y-0">
+                      <ArrowDown size={15} strokeWidth={3}/>
+                    </button>
                     <button
                       onClick={() => setEditingProduct({
                         id: pid,

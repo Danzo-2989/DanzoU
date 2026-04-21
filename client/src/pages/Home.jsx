@@ -142,7 +142,7 @@ function Home() {
 
       {/* ── GRID PRODUK ── */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
-        {filteredProducts.map(([id, product]) => {
+        {filteredProducts.sort((a,b) => (a[1].order || 0) - (b[1].order || 0)).map(([id, product]) => {
           const firstTag = product.tags ? product.tags.split(',')[0].trim() : null;
           const hasMedia = !!(product.feature_media || product.image);
           return (
