@@ -141,15 +141,15 @@ function Home() {
               <span className="text-[10px] md:text-xs font-black opacity-50 block uppercase tracking-widest flex items-center gap-2">
                 <div className="w-2 h-2 bg-neo-dark rounded-full"></div> Filter Device / Platform
               </span>
-              <div className="flex gap-2 overflow-x-auto pb-2 items-center custom-scrollbar">
+              <div className="flex gap-2 overflow-x-auto pb-3 items-center custom-scrollbar pr-6 md:pr-2">
                 {deviceCategories.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setActiveDeviceFilter(cat)}
-                    className={`shrink-0 border-4 border-neo-border px-4 py-2 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150
+                    className={`shrink-0 border-2 md:border-4 border-neo-border px-3 py-1.5 md:px-4 md:py-2 font-black uppercase text-[10px] md:text-sm tracking-widest md:tracking-wider transition-all duration-150
                       ${activeDeviceFilter === cat
-                        ? 'bg-neo-dark text-neo-surface shadow-none translate-x-1 translate-y-1'
-                        : 'bg-neo-surface hover:-translate-y-1 shadow-[4px_4px_0px_0px_var(--color-neo-border)] hover:shadow-[6px_6px_0px_0px_var(--color-neo-border)]'
+                        ? 'bg-neo-dark text-neo-surface shadow-none translate-x-0.5 translate-y-0.5 md:translate-x-1 md:translate-y-1'
+                        : 'bg-neo-surface hover:-translate-y-0.5 md:hover:-translate-y-1 shadow-[2px_2px_0px_0px_var(--color-neo-border)] md:shadow-[4px_4px_0px_0px_var(--color-neo-border)] hover:shadow-[3px_3px_0px_0px_var(--color-neo-border)] md:hover:shadow-[6px_6px_0px_0px_var(--color-neo-border)]'
                       }`}
                   >
                     {cat}
@@ -165,15 +165,15 @@ function Home() {
               <span className="text-[10px] md:text-xs font-black opacity-50 block uppercase tracking-widest flex items-center gap-2">
                 <div className="w-2 h-2 bg-yellow-400 border-2 border-neo-border rounded-full"></div> Filter Kategori Game
               </span>
-              <div className="flex gap-2 overflow-x-auto pb-2 items-center custom-scrollbar">
+              <div className="flex gap-2 overflow-x-auto pb-3 items-center custom-scrollbar pr-6 md:pr-2">
                 {gameCategories.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setActiveGameFilter(cat)}
-                    className={`shrink-0 border-4 border-neo-border px-4 py-2 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150
+                    className={`shrink-0 border-2 md:border-4 border-neo-border px-3 py-1.5 md:px-4 md:py-2 font-black uppercase text-[10px] md:text-sm tracking-widest md:tracking-wider transition-all duration-150
                       ${activeGameFilter === cat
-                        ? 'bg-yellow-300 text-neo-dark shadow-none translate-x-1 translate-y-1'
-                        : 'bg-neo-surface hover:-translate-y-1 shadow-[4px_4px_0px_0px_var(--color-neo-border)] hover:shadow-[6px_6px_0px_0px_var(--color-neo-border)]'
+                        ? 'bg-yellow-300 text-neo-dark shadow-none translate-x-0.5 translate-y-0.5 md:translate-x-1 md:translate-y-1'
+                        : 'bg-neo-surface hover:-translate-y-0.5 md:hover:-translate-y-1 shadow-[2px_2px_0px_0px_var(--color-neo-border)] md:shadow-[4px_4px_0px_0px_var(--color-neo-border)] hover:shadow-[3px_3px_0px_0px_var(--color-neo-border)] md:hover:shadow-[6px_6px_0px_0px_var(--color-neo-border)]'
                       }`}
                   >
                     {cat}
