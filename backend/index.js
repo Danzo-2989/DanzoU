@@ -361,6 +361,30 @@ app.post("/admin/settings/announcement", adminAuth, async (req, res) => {
   }
 });
 
+// --- ENDPOINT: Admin Tambah Kategori ---
+app.post("/admin/settings/categories", adminAuth, async (req, res) => {
+  try {
+    const data = req.body; // { name: 'Free Fire', type: 'GAME' }
+    const ref = db.ref('settings/categories');
+    const newRef = ref.push();
+    await newRef.set(data);
+    res.json({ success: true, message: "Kategori berhasil ditambahkan" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// --- ENDPOINT: Admin Hapus Kategori ---
+app.delete("/admin/settings/categories/:id", adminAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.ref(`settings/categories/${id}`).remove();
+    res.json({ success: true, message: "Kategori berhasil dihapus" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // --- ENDPOINT: Admin Resend Key ---
 app.post("/admin/transactions/:trx_id/resend", adminAuth, async (req, res) => {
   try {
