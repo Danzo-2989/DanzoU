@@ -54,7 +54,7 @@ async function sendEmail(to, subject, text) {
 
 // --- ENDPOINT: Create Checkout ---
 app.post("/checkout", async (req, res) => {
-  const { subProductId, productId, email, whatsapp, price, productName } = req.body;
+  const { subProductId, email, whatsapp, price, productName } = req.body;
 
   try {
     const reference_id = `TRX-${Date.now()}`;
@@ -75,7 +75,6 @@ app.post("/checkout", async (req, res) => {
       await db.ref(`transactions/${trxData.payinaja_trx_id}`).set({
         trx_id: trxData.payinaja_trx_id,
         merchant_ref: reference_id,
-        product_id: productId || null,
         sub_product_id: subProductId,
         product_name: productName,
         buyer_email: email,
@@ -141,32 +140,12 @@ app.get("/status/:trx_id", async (req, res) => {
 
           // B. Hapus key dari stok (biar gak kepake orang lain)
           await db.ref(`stock/${trx.sub_product_id}/${keyId}`).remove();
-          
-          // Kurangi stock_counts
-          const countRef = db.ref(`stock_counts/${trx.sub_product_id}`);
-          await countRef.transaction(c => (c || 0) > 0 ? c - 1 : 0);
 
           // C. Ambil Email Template dari Settings
           const templateSnap = await db.ref('settings/emailTemplate').get();
           let template = templateSnap.val() || "Terima kasih, berikut key anda: {stok_key}";
           
-          let finalMessage = template.replace("{stok_key}", actualKey);
-
-          // C.2. Fetch product download_url if exists
-          let productDownloadUrl = '';
-          if (trx.product_id) {
-            const prodSnap = await db.ref(`products/${trx.product_id}`).get();
-            if (prodSnap.exists() && prodSnap.val().download_url) {
-              productDownloadUrl = prodSnap.val().download_url;
-              if (template.includes('{download_url}')) {
-                finalMessage = finalMessage.replace("{download_url}", productDownloadUrl);
-              } else {
-                finalMessage += `\n\nLink Download Aplikasi: ${productDownloadUrl}`;
-              }
-            } else {
-              finalMessage = finalMessage.replace("{download_url}", "");
-            }
-          }
+          const finalMessage = template.replace("{stok_key}", actualKey);
 
           // D. Kirim Email Ke Buyer
           await sendEmail(trx.buyer_email, `LICENSE KEY: ${trx.product_name}`, finalMessage);
@@ -179,22 +158,11 @@ app.get("/status/:trx_id", async (req, res) => {
           // F. Update Status di DB
           await trxRef.update({ status: 'success', key_delivered: actualKey });
           
-          return res.json({ status: 'success', message: "Order fulfilled!", key: actualKey, download_url: productDownloadUrl });
+          return res.json({ status: 'success', message: "Order fulfilled!", key: actualKey });
         } else {
           // Kasus Stok Habis Mendadak
           return res.json({ status: 'out_of_stock', message: "Payment success but stock is empty! Contact admin." });
         }
-      }
-      // Jika status di DB sudah success sebelumnya (sudah fulfilled) -> kembalikan key yang sudah tersimpan
-      if (trx && trx.status === 'success') {
-        let productDownloadUrl = '';
-        if (trx.product_id) {
-          const prodSnap = await db.ref(`products/${trx.product_id}`).get();
-          if (prodSnap.exists() && prodSnap.val().download_url) {
-            productDownloadUrl = prodSnap.val().download_url;
-          }
-        }
-        return res.json({ status: 'success', key: trx.key_delivered || '', download_url: productDownloadUrl });
       }
     }
 
@@ -252,11 +220,6 @@ app.post("/admin/stock/:subId", adminAuth, async (req, res) => {
       const newKeyRef = stockRef.push();
       await newKeyRef.set(key);
     }
-    
-    // Update stock_counts
-    const countRef = db.ref(`stock_counts/${subId}`);
-    await countRef.transaction(c => (c || 0) + keys.length);
-
     res.json({ success: true, message: `${keys.length} keys berhasil ditambahkan` });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -297,7 +260,6 @@ app.delete("/admin/products/:id", adminAuth, async (req, res) => {
       const subIds = Object.keys(prodSnap.val());
       for (const subId of subIds) {
         await db.ref(`stock/${subId}`).remove();
-        await db.ref(`stock_counts/${subId}`).remove();
       }
     }
     await db.ref(`products/${id}`).remove();
@@ -313,7 +275,6 @@ app.delete("/admin/products/:productId/sub_products/:subId", adminAuth, async (r
     const { productId, subId } = req.params;
     await db.ref(`products/${productId}/sub_products/${subId}`).remove();
     await db.ref(`stock/${subId}`).remove();
-    await db.ref(`stock_counts/${subId}`).remove();
     res.json({ success: true, message: "Variasi berhasil dihapus" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -325,8 +286,6 @@ app.delete("/admin/stock/:subId/:keyId", adminAuth, async (req, res) => {
   try {
     const { subId, keyId } = req.params;
     await db.ref(`stock/${subId}/${keyId}`).remove();
-    const countRef = db.ref(`stock_counts/${subId}`);
-    await countRef.transaction(c => (c || 0) > 0 ? c - 1 : 0);
     res.json({ success: true, message: "Key berhasil dihapus" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -379,6 +338,18 @@ app.put("/admin/stock/:subId/:keyId", adminAuth, async (req, res) => {
   }
 });
 
+// --- ENDPOINT: Admin Reorder Items ---
+app.post("/admin/reorder", adminAuth, async (req, res) => {
+  try {
+    const { updates } = req.body; 
+    // updates should be an object mapping paths to values, e.g. {"products/p1/order": 1, "products/p2/order": 2}
+    await db.ref('/').update(updates);
+    res.json({ success: true, message: "Urutan berhasil disimpan" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // --- ENDPOINT: Admin Simpan Pengumuman Website ---
 app.post("/admin/settings/announcement", adminAuth, async (req, res) => {
   try {
@@ -410,40 +381,6 @@ app.post("/admin/transactions/:trx_id/resend", adminAuth, async (req, res) => {
     await sendEmail(trx.buyer_email, `[RESEND] LICENSE KEY: ${trx.product_name}`, finalMessage);
     
     res.json({ success: true, message: "Email berhasil dikirim ulang ke " + trx.buyer_email });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// --- NEW PROTECTED ADMIN ENDPOINTS ---
-app.get("/admin/transactions", adminAuth, async (req, res) => {
-  try {
-    const snap = await db.ref("transactions").get();
-    res.json({ success: true, transactions: snap.val() || {} });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-app.get("/admin/stock", adminAuth, async (req, res) => {
-  try {
-    const snap = await db.ref("stock").get();
-    res.json({ success: true, stock: snap.val() || {} });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-app.post("/admin/sync_stock_counts", adminAuth, async (req, res) => {
-  try {
-    const snap = await db.ref("stock").get();
-    const stock = snap.val() || {};
-    const counts = {};
-    for (let subId in stock) {
-      counts[subId] = Object.keys(stock[subId]).length;
-    }
-    await db.ref("stock_counts").set(counts);
-    res.json({ success: true, message: "Stock counts berhasil disinkronisasi!", counts });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
