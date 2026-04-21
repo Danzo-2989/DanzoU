@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { ref, onValue } from 'firebase/database';
 import { useNavigate } from 'react-router-dom';
-import { Zap, CircleAlert, KeyRound, DollarSign, Lock, Clock, X, Play, Search, Moon, Sun } from 'lucide-react';
+import { Zap, CircleAlert, KeyRound, DollarSign, Lock, Clock, X, Play, Search, Moon, Sun, MoreVertical, MessageCircle, Send, Youtube, Music } from 'lucide-react';
 
 function Home() {
   const [products, setProducts] = useState({});
@@ -12,6 +12,7 @@ function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [previewProduct, setPreviewProduct] = useState(null); // { name, mediaUrl, mediaType }
   const [isDark, setIsDark] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -97,7 +98,7 @@ function Home() {
     <div className="px-3 py-4 md:px-8 md:py-8 max-w-7xl mx-auto min-h-screen flex flex-col gap-6 md:gap-12">
 
       {/* ── HEADER ── */}
-      <header className="flex items-center gap-3 neo-card bg-neo-surface animate-fade-in-up py-3 px-4 md:py-6 md:px-6 justify-between">
+      <header className="flex items-center gap-3 neo-card bg-neo-surface animate-fade-in-up py-3 px-4 md:py-6 md:px-6 justify-between relative z-50">
         <div className="flex items-center gap-3">
           <div className="bg-neo-green text-slate-900 border-4 border-neo-border p-2 md:p-3 shadow-neo shrink-0">
             <KeyRound size={24} className="text-slate-900" strokeWidth={2.5}/>
@@ -111,10 +112,16 @@ function Home() {
             </p>
           </div>
         </div>
-        <button onClick={toggleTheme} title="Toggle Dark/Light Mode"
-          className="bg-neo-surface border-4 border-neo-border p-2 md:p-3 shadow-neo hover:-translate-y-1 hover:shadow-neo-heavy transition-all cursor-pointer">
-          {isDark ? <Sun size={24} className="text-neo-dark" strokeWidth={3}/> : <Moon size={24} className="text-neo-dark" strokeWidth={3}/>}
-        </button>
+        <div className="flex gap-2">
+          <button onClick={toggleTheme} title="Toggle Dark/Light Mode"
+            className="bg-neo-surface border-4 border-neo-border p-2 md:p-3 shadow-neo hover:-translate-y-1 hover:shadow-neo-heavy transition-all cursor-pointer">
+            {isDark ? <Sun size={24} className="text-neo-dark" strokeWidth={3}/> : <Moon size={24} className="text-neo-dark" strokeWidth={3}/>}
+          </button>
+          <button onClick={() => setIsMenuOpen(true)} title="Menu Saluran & Kontak"
+            className="bg-yellow-400 border-4 border-neo-border p-2 md:p-3 shadow-neo hover:-translate-y-1 hover:shadow-neo-heavy transition-all cursor-pointer">
+            <MoreVertical size={24} className="text-slate-900" strokeWidth={3}/>
+          </button>
+        </div>
       </header>
 
       {/* ── PENCARIAN & FILTER KATEGORI ── */}
@@ -371,6 +378,48 @@ function Home() {
             <p className="text-center text-xs font-bold opacity-40 text-neo-surface py-2 uppercase tracking-widest">
               Klik area luar untuk menutup
             </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── SIDEBAR MENU ── */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-[100] flex justify-end">
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-neo-dark/60 backdrop-blur-sm animate-fade-in" onClick={() => setIsMenuOpen(false)}></div>
+          
+          {/* Sidebar Drawer */}
+          <div className="relative w-[300px] max-w-[80vw] bg-neo-surface h-full border-l-8 border-neo-border p-6 shadow-[-8px_0_0_0_var(--color-neo-border)] animate-slide-in-right flex flex-col gap-5 overflow-y-auto">
+            <div className="flex justify-between items-center border-b-4 border-neo-border pb-4">
+              <h2 className="text-xl font-black uppercase text-neo-dark tracking-wider flex items-center gap-2">
+                 Menu
+              </h2>
+              <button onClick={() => setIsMenuOpen(false)} className="border-4 border-neo-border bg-red-400 text-slate-900 p-1 hover:-translate-y-1 transition-all shadow-[2px_2px_0_0_var(--color-neo-border)] active:translate-y-0 active:shadow-none">
+                <X size={20} strokeWidth={3}/>
+              </button>
+            </div>
+            
+            <div className="flex flex-col gap-3 mt-2">
+              <a href="#" target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-sky-400 border-4 border-neo-border p-3 shadow-[4px_4px_0_0_var(--color-neo-border)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--color-neo-border)] active:translate-y-0 transition-all text-slate-900 font-black uppercase text-sm">
+                <Send size={18} strokeWidth={3}/> Telegram
+              </a>
+              <a href="#" target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-emerald-400 border-4 border-neo-border p-3 shadow-[4px_4px_0_0_var(--color-neo-border)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--color-neo-border)] active:translate-y-0 transition-all text-slate-900 font-black uppercase text-sm">
+                <MessageCircle size={18} strokeWidth={3}/> WhatsApp Chat
+              </a>
+              <a href="#" target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-emerald-300 border-4 border-neo-border p-3 shadow-[4px_4px_0_0_var(--color-neo-border)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--color-neo-border)] active:translate-y-0 transition-all text-slate-900 font-black uppercase text-sm">
+                <MessageCircle size={18} strokeWidth={3}/> Saluran WA
+              </a>
+              <a href="#" target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-red-500 border-4 border-neo-border p-3 shadow-[4px_4px_0_0_var(--color-neo-border)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--color-neo-border)] active:translate-y-0 transition-all text-slate-900 font-black uppercase text-sm">
+                <Youtube size={18} strokeWidth={3}/> YouTube
+              </a>
+              <a href="#" target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-purple-400 border-4 border-neo-border p-3 shadow-[4px_4px_0_0_var(--color-neo-border)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--color-neo-border)] active:translate-y-0 transition-all text-slate-900 font-black uppercase text-sm">
+                <Music size={18} strokeWidth={3}/> TikTok
+              </a>
+            </div>
+            
+            <div className="mt-auto opacity-50 text-center text-[10px] font-black uppercase tracking-widest pt-4 border-t-4 border-neo-border text-neo-dark">
+              &copy; {new Date().getFullYear()} DANZO STORE
+            </div>
           </div>
         </div>
       )}
