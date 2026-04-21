@@ -11,18 +11,24 @@
   --shadow-neo-heavy: 12px 12px 0px 0px var(--color-neo-border);
   --shadow-neo-pressed: 0px 0px 0px 0px var(--color-neo-border);
 
-  /* Animasi V4 Way */
+  /* Animasi */
   --animation-fade-in-up: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animation-slide-in-right: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animation-fade-in: fadeIn 0.25s ease-out forwards;
 
   @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideInRight {
+    from { opacity: 0; transform: translateX(100%); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 }
 
@@ -86,4 +92,15 @@
   .neo-input:focus {
     @apply outline-none -translate-y-1 shadow-neo ring-4 ring-neo-green/30;
   }
+
+  /* Sidebar overlay animation classes */
+  .animate-slide-in-right {
+    animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.25s ease-out forwards;
+  }
 }
+
+
