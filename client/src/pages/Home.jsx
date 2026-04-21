@@ -7,7 +7,8 @@ import { Zap, CircleAlert, KeyRound, DollarSign, Lock, Clock, X, Play, Search, M
 function Home() {
   const [products, setProducts] = useState({});
   const [stock, setStock] = useState({});
-  const [activeFilter, setActiveFilter] = useState('ALL');
+  const [activeDeviceFilter, setActiveDeviceFilter] = useState('ALL');
+  const [activeGameFilter, setActiveGameFilter] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [previewProduct, setPreviewProduct] = useState(null); // { name, mediaUrl, mediaType }
   const [isDark, setIsDark] = useState(false);
@@ -31,9 +32,15 @@ function Home() {
     }
   };
 
-  const allCategories = ['ALL', ...Array.from(
+  const deviceCategories = ['ALL', ...Array.from(
     new Set(Object.values(products).flatMap(p =>
       p.tags ? p.tags.split(',').map(t => t.trim().toUpperCase()).filter(Boolean) : []
+    ))
+  )];
+
+  const gameCategories = ['ALL', ...Array.from(
+    new Set(Object.values(products).flatMap(p =>
+      p.game_category ? p.game_category.split(',').map(t => t.trim().toUpperCase()).filter(Boolean) : []
     ))
   )];
 
@@ -42,9 +49,15 @@ function Home() {
                           (product.desc && product.desc.toLowerCase().includes(searchQuery.toLowerCase()));
     if (!matchesSearch) return false;
 
-    if (activeFilter === 'ALL') return true;
-    if (!product.tags) return false;
-    return product.tags.split(',').map(t => t.trim().toUpperCase()).includes(activeFilter);
+    const matchDevice = activeDeviceFilter === 'ALL' || (
+      product.tags && product.tags.split(',').map(t => t.trim().toUpperCase()).includes(activeDeviceFilter)
+    );
+
+    const matchGame = activeGameFilter === 'ALL' || (
+      product.game_category && product.game_category.split(',').map(t => t.trim().toUpperCase()).includes(activeGameFilter)
+    );
+
+    return matchDevice && matchGame;
   });
 
   const tagColorMap = {
@@ -105,37 +118,65 @@ function Home() {
       </header>
 
       {/* ── PENCARIAN & FILTER KATEGORI ── */}
-      <div className="flex flex-col md:flex-row gap-3 animate-fade-in-up">
-        {/* Kolom Pencarian */}
-        <div className="flex bg-neo-surface border-4 border-neo-border shadow-[3px_3px_0px_0px_var(--color-neo-border)] flex-1 max-w-sm focus-within:-translate-y-1 focus-within:shadow-[4px_4px_0_0_var(--color-neo-border)] transition-all h-10 md:h-12">
-          <div className="bg-neo-green text-slate-900 px-3 border-r-4 border-neo-border flex items-center justify-center ">
-            <Search size={18} strokeWidth={3}/>
+      <div className="flex flex-col gap-4 animate-fade-in-up">
+        
+        <div className="flex flex-col md:flex-row gap-3">
+          {/* Kolom Pencarian */}
+          <div className="flex bg-neo-surface border-4 border-neo-border shadow-[3px_3px_0px_0px_var(--color-neo-border)] flex-1 focus-within:-translate-y-1 focus-within:shadow-[4px_4px_0_0_var(--color-neo-border)] transition-all h-10 md:h-12 w-full md:max-w-sm shrink-0">
+            <div className="bg-neo-green text-slate-900 px-3 border-r-4 border-neo-border flex items-center justify-center ">
+              <Search size={18} strokeWidth={3}/>
+            </div>
+            <input type="text" placeholder="CARI PRODUK..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+              className="w-full px-3 font-bold uppercase text-neo-dark outline-none bg-transparent placeholder:opacity-50 text-xs md:text-sm"/>
+            {searchQuery && (
+              <button onClick={() => setSearchQuery('')} className="px-3 flex items-center justify-center text-neo-dark hover:bg-red-200 border-l-4 border-neo-border">
+                <X size={16} strokeWidth={3}/>
+              </button>
+            )}
           </div>
-          <input type="text" placeholder="CARI PRODUK..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-            className="w-full px-3 font-bold uppercase text-neo-dark outline-none bg-transparent placeholder:opacity-50 text-xs md:text-sm"/>
-          {searchQuery && (
-            <button onClick={() => setSearchQuery('')} className="px-3 flex items-center justify-center text-neo-dark hover:bg-red-200 border-l-4 border-neo-border">
-              <X size={16} strokeWidth={3}/>
-            </button>
+
+          {/* Filter Kategori Device */}
+          {deviceCategories.length > 1 && (
+            <div className="flex flex-col gap-1 overflow-hidden w-full">
+              <span className="text-[10px] font-black opacity-50 block uppercase">Filter Device / Platform</span>
+              <div className="flex gap-2 overflow-x-auto pb-1 items-center">
+                {deviceCategories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveDeviceFilter(cat)}
+                    className={`shrink-0 border-4 border-neo-border px-3 py-1.5 md:px-5 md:py-1.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 h-10 md:h-12
+                      ${activeDeviceFilter === cat
+                        ? 'bg-neo-dark text-neo-surface shadow-none translate-x-0.5 translate-y-0.5'
+                        : 'bg-neo-surface hover:-translate-y-1 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:shadow-[4px_4px_0px_0px_var(--color-neo-border)]'
+                      }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
         </div>
 
-        {/* Filter Kategori */}
-        {allCategories.length > 1 && (
-          <div className="flex gap-2 overflow-x-auto pb-1 flex-1 items-center">
-            {allCategories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveFilter(cat)}
-                className={`shrink-0 border-4 border-neo-border px-3 py-1.5 md:px-5 md:py-1.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 h-10 md:h-12
-                  ${activeFilter === cat
-                    ? 'bg-neo-dark text-neo-surface shadow-none translate-x-0.5 translate-y-0.5'
-                    : 'bg-neo-surface hover:-translate-y-1 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:shadow-[4px_4px_0px_0px_var(--color-neo-border)]'
-                  }`}
-              >
-                {cat}
-              </button>
-            ))}
+        {/* Filter Kategori Game */}
+        {gameCategories.length > 1 && (
+          <div className="flex flex-col gap-1 overflow-hidden w-full">
+            <span className="text-[10px] font-black opacity-50 block uppercase">Filter Kategori Game</span>
+            <div className="flex gap-2 overflow-x-auto pb-1 items-center">
+              {gameCategories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveGameFilter(cat)}
+                  className={`shrink-0 border-4 border-neo-border px-3 py-1.5 md:px-5 md:py-1.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 h-10 md:h-12
+                    ${activeGameFilter === cat
+                      ? 'bg-yellow-300 text-neo-dark shadow-none translate-x-0.5 translate-y-0.5'
+                      : 'bg-neo-surface hover:-translate-y-1 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:shadow-[4px_4px_0px_0px_var(--color-neo-border)]'
+                    }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -215,10 +256,10 @@ function Home() {
             <CircleAlert size={32} strokeWidth={2.5} />
           </div>
           <h2 className="text-2xl font-black uppercase mb-2">
-            {activeFilter === 'ALL' ? 'Wow, Kosong!' : `Tidak ada "${activeFilter}"`}
+            {activeDeviceFilter === 'ALL' && activeGameFilter === 'ALL' ? 'Wow, Kosong!' : 'Tidak ada produk'}
           </h2>
           <p className="font-bold opacity-75 text-sm">
-            {activeFilter === 'ALL' ? 'Belum ada produk.' : 'Coba kategori lain.'}
+            {activeDeviceFilter === 'ALL' && activeGameFilter === 'ALL' ? 'Belum ada produk.' : 'Coba kategori lain.'}
           </p>
         </div>
       )}

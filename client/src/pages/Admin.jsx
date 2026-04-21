@@ -18,7 +18,7 @@ function Admin() {
     buttonText: '',
     buttonUrl: ''
   });
-  const [newProduct, setNewProduct] = useState({ name: '', desc: '', image: '', tags: '', feature_media: '', download_url: '' });
+  const [newProduct, setNewProduct] = useState({ name: '', desc: '', image: '', tags: '', game_category: '', feature_media: '', download_url: '' });
   const [newSub, setNewSub] = useState({ productId: '', label: '', price: '' });
   const [bulkStock, setBulkStock] = useState({ subId: '', keys: '' });
   const [auth, setAuth] = useState({ isAuthed: false, password: '' });
@@ -62,7 +62,7 @@ function Admin() {
     e.preventDefault();
     try {
       await axios.post(`${backendUrl}/admin/products`, newProduct, { headers: { 'x-admin-password': auth.password }});
-      setNewProduct({ name: '', desc: '', image: '', tags: '', feature_media: '', download_url: '' });
+      setNewProduct({ name: '', desc: '', image: '', tags: '', game_category: '', feature_media: '', download_url: '' });
       alert('Produk berhasil ditambahkan!');
     } catch (err) { alert(err.response?.data?.message || 'Gagal tambah produk'); }
   };
@@ -322,6 +322,13 @@ function Admin() {
               <input className="neo-input text-sm" placeholder="Atau ketik manual: Android, iOS, PC"
                 value={newProduct.tags} onChange={e => setNewProduct({...newProduct, tags: e.target.value})}/>
             </div>
+            <div className="flex flex-col gap-2">
+              <label className="font-black uppercase text-sm flex items-center gap-2 bg-yellow-200 border-2 border-neo-border w-fit px-3 py-1 shadow-[2px_2px_0_0_var(--color-neo-border)]">
+                <Gamepad2 size={14} strokeWidth={3}/> Kategori Game
+              </label>
+              <input className="neo-input text-sm" placeholder="Contoh: Action, FPS, MOBA, dll..."
+                value={newProduct.game_category} onChange={e => setNewProduct({...newProduct, game_category: e.target.value})}/>
+            </div>
             <button className="neo-button-primary mt-2">SIMPAN PRODUK</button>
           </form>
         </section>
@@ -489,7 +496,7 @@ function Admin() {
                     <button
                       onClick={() => setEditingProduct({
                         id: pid,
-                        data: { name: product.name, desc: product.desc || '', image: product.image || '', tags: product.tags || '', feature_media: product.feature_media || '', download_url: product.download_url || '' }
+                        data: { name: product.name, desc: product.desc || '', image: product.image || '', tags: product.tags || '', game_category: product.game_category || '', feature_media: product.feature_media || '', download_url: product.download_url || '' }
                       })}
                       className="bg-yellow-300 border-4 border-neo-border p-1.5 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:-translate-y-1 transition-all">
                       <Pencil size={15} strokeWidth={3}/>
@@ -515,6 +522,8 @@ function Admin() {
                       onChange={e => setEditingProduct({...editingProduct, data: {...editingProduct.data, feature_media: e.target.value}})}/>
                     <input className="neo-input text-sm" placeholder="Tags (Android, iOS, PC...)" value={editingProduct.data.tags}
                       onChange={e => setEditingProduct({...editingProduct, data: {...editingProduct.data, tags: e.target.value}})}/>
+                    <input className="neo-input text-sm" placeholder="Kategori Game (Action, RPG...)" value={editingProduct.data.game_category}
+                      onChange={e => setEditingProduct({...editingProduct, data: {...editingProduct.data, game_category: e.target.value}})}/>
                     <input className="neo-input text-sm" placeholder="URL Download Aplikasi (Link Mediafire, dll)" value={editingProduct.data.download_url}
                       onChange={e => setEditingProduct({...editingProduct, data: {...editingProduct.data, download_url: e.target.value}})}/>
                     <div className="flex gap-2">
