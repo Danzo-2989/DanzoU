@@ -87,3 +87,19 @@
     @apply outline-none -translate-y-1 shadow-neo ring-4 ring-neo-green/30;
   }
 }
+
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent; 
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--color-neo-border); 
+  }
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-neo-border) transparent;
+  }
+}
