@@ -400,19 +400,19 @@ function Home() {
             </div>
             
             <div className="flex flex-col gap-3 mt-2">
-              <a href="#" target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-sky-400 border-4 border-neo-border p-3 shadow-[4px_4px_0_0_var(--color-neo-border)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--color-neo-border)] active:translate-y-0 transition-all text-slate-900 font-black uppercase text-sm">
+              <a href="https://t.me/DanzoStoreID" target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-sky-400 border-4 border-neo-border p-3 shadow-[4px_4px_0_0_var(--color-neo-border)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--color-neo-border)] active:translate-y-0 transition-all text-slate-900 font-black uppercase text-sm">
                 <Send size={18} strokeWidth={3}/> Telegram
               </a>
-              <a href="#" target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-emerald-400 border-4 border-neo-border p-3 shadow-[4px_4px_0_0_var(--color-neo-border)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--color-neo-border)] active:translate-y-0 transition-all text-slate-900 font-black uppercase text-sm">
+              <a href="https://wa.me/6289685410080" target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-emerald-400 border-4 border-neo-border p-3 shadow-[4px_4px_0_0_var(--color-neo-border)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--color-neo-border)] active:translate-y-0 transition-all text-slate-900 font-black uppercase text-sm">
                 <MessageCircle size={18} strokeWidth={3}/> WhatsApp Chat
               </a>
-              <a href="#" target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-emerald-300 border-4 border-neo-border p-3 shadow-[4px_4px_0_0_var(--color-neo-border)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--color-neo-border)] active:translate-y-0 transition-all text-slate-900 font-black uppercase text-sm">
+              <a href="https://whatsapp.com/channel/0029VauSJKG4o7qSMawZwE10" target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-emerald-300 border-4 border-neo-border p-3 shadow-[4px_4px_0_0_var(--color-neo-border)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--color-neo-border)] active:translate-y-0 transition-all text-slate-900 font-black uppercase text-sm">
                 <MessageCircle size={18} strokeWidth={3}/> Saluran WA
               </a>
-              <a href="#" target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-red-500 border-4 border-neo-border p-3 shadow-[4px_4px_0_0_var(--color-neo-border)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--color-neo-border)] active:translate-y-0 transition-all text-slate-900 font-black uppercase text-sm">
+              <a href="https://www.youtube.com/@danzoxiterz" target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-red-500 border-4 border-neo-border p-3 shadow-[4px_4px_0_0_var(--color-neo-border)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--color-neo-border)] active:translate-y-0 transition-all text-slate-900 font-black uppercase text-sm">
                 <Youtube size={18} strokeWidth={3}/> YouTube
               </a>
-              <a href="#" target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-purple-400 border-4 border-neo-border p-3 shadow-[4px_4px_0_0_var(--color-neo-border)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--color-neo-border)] active:translate-y-0 transition-all text-slate-900 font-black uppercase text-sm">
+              <a href="https://www.tiktok.com/@danzoxiterznew" target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-purple-400 border-4 border-neo-border p-3 shadow-[4px_4px_0_0_var(--color-neo-border)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--color-neo-border)] active:translate-y-0 transition-all text-slate-900 font-black uppercase text-sm">
                 <Music size={18} strokeWidth={3}/> TikTok
               </a>
             </div>
