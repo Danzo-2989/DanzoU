@@ -404,7 +404,7 @@ function Home() {
                 <Send size={18} strokeWidth={3}/> Telegram
               </a>
               <a href="https://wa.me/6289685410080" target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-emerald-400 border-4 border-neo-border p-3 shadow-[4px_4px_0_0_var(--color-neo-border)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--color-neo-border)] active:translate-y-0 transition-all text-slate-900 font-black uppercase text-sm">
-                <MessageCircle size={18} strokeWidth={3}/> WhatsApp Chat
+                <MessageCircle size={18} strokeWidth={3}/> WhatsApp
               </a>
               <a href="https://whatsapp.com/channel/0029VauSJKG4o7qSMawZwE10" target="_blank" rel="noreferrer" className="flex items-center gap-3 bg-emerald-300 border-4 border-neo-border p-3 shadow-[4px_4px_0_0_var(--color-neo-border)] hover:-translate-y-1 hover:shadow-[6px_6px_0_0_var(--color-neo-border)] active:translate-y-0 transition-all text-slate-900 font-black uppercase text-sm">
                 <MessageCircle size={18} strokeWidth={3}/> Saluran WA
