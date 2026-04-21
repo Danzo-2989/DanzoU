@@ -118,36 +118,62 @@ function Home() {
       </header>
 
       {/* ── PENCARIAN & FILTER KATEGORI ── */}
-      <div className="flex flex-col gap-4 animate-fade-in-up">
-        
-        <div className="flex flex-col md:flex-row gap-3">
-          {/* Kolom Pencarian */}
-          <div className="flex bg-neo-surface border-4 border-neo-border shadow-[3px_3px_0px_0px_var(--color-neo-border)] flex-1 focus-within:-translate-y-1 focus-within:shadow-[4px_4px_0_0_var(--color-neo-border)] transition-all h-10 md:h-12 w-full md:max-w-sm shrink-0">
-            <div className="bg-neo-green text-slate-900 px-3 border-r-4 border-neo-border flex items-center justify-center ">
-              <Search size={18} strokeWidth={3}/>
-            </div>
-            <input type="text" placeholder="CARI PRODUK..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-              className="w-full px-3 font-bold uppercase text-neo-dark outline-none bg-transparent placeholder:opacity-50 text-xs md:text-sm"/>
-            {searchQuery && (
-              <button onClick={() => setSearchQuery('')} className="px-3 flex items-center justify-center text-neo-dark hover:bg-red-200 border-l-4 border-neo-border">
-                <X size={16} strokeWidth={3}/>
-              </button>
-            )}
+      <div className="flex flex-col gap-5 animate-fade-in-up">
+        {/* Kolom Pencarian */}
+        <div className="flex bg-neo-surface border-4 border-neo-border shadow-[4px_4px_0px_0px_var(--color-neo-border)] focus-within:-translate-y-1 focus-within:shadow-[6px_6px_0_0_var(--color-neo-border)] transition-all h-12 md:h-14 w-full shrink-0">
+          <div className="bg-neo-green text-slate-900 px-4 border-r-4 border-neo-border flex items-center justify-center">
+            <Search size={20} strokeWidth={3}/>
           </div>
+          <input type="text" placeholder="CARI PRODUK (NAMA ATAU DESKRIPSI)..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+            className="w-full px-4 font-black uppercase text-neo-dark outline-none bg-transparent placeholder:opacity-50 text-sm md:text-base"/>
+          {searchQuery && (
+            <button onClick={() => setSearchQuery('')} className="px-4 flex items-center justify-center text-neo-dark hover:bg-red-200 border-l-4 border-neo-border">
+              <X size={20} strokeWidth={3}/>
+            </button>
+          )}
+        </div>
 
+        {/* Filter Group */}
+        <div className="flex flex-col md:flex-row gap-4 md:gap-6">
           {/* Filter Kategori Device */}
           {deviceCategories.length > 1 && (
-            <div className="flex flex-col gap-1 overflow-hidden w-full">
-              <span className="text-[10px] font-black opacity-50 block uppercase">Filter Device / Platform</span>
-              <div className="flex gap-2 overflow-x-auto pb-1 items-center">
+            <div className="flex flex-col gap-2 overflow-hidden flex-1">
+              <span className="text-[10px] md:text-xs font-black opacity-50 block uppercase tracking-widest flex items-center gap-2">
+                <div className="w-2 h-2 bg-neo-dark rounded-full"></div> Filter Device / Platform
+              </span>
+              <div className="flex gap-2 overflow-x-auto pb-2 items-center custom-scrollbar">
                 {deviceCategories.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setActiveDeviceFilter(cat)}
-                    className={`shrink-0 border-4 border-neo-border px-3 py-1.5 md:px-5 md:py-1.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 h-10 md:h-12
+                    className={`shrink-0 border-4 border-neo-border px-4 py-2 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150
                       ${activeDeviceFilter === cat
-                        ? 'bg-neo-dark text-neo-surface shadow-none translate-x-0.5 translate-y-0.5'
-                        : 'bg-neo-surface hover:-translate-y-1 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:shadow-[4px_4px_0px_0px_var(--color-neo-border)]'
+                        ? 'bg-neo-dark text-neo-surface shadow-none translate-x-1 translate-y-1'
+                        : 'bg-neo-surface hover:-translate-y-1 shadow-[4px_4px_0px_0px_var(--color-neo-border)] hover:shadow-[6px_6px_0px_0px_var(--color-neo-border)]'
+                      }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Filter Kategori Game */}
+          {gameCategories.length > 1 && (
+            <div className="flex flex-col gap-2 overflow-hidden flex-1">
+              <span className="text-[10px] md:text-xs font-black opacity-50 block uppercase tracking-widest flex items-center gap-2">
+                <div className="w-2 h-2 bg-yellow-400 border-2 border-neo-border rounded-full"></div> Filter Kategori Game
+              </span>
+              <div className="flex gap-2 overflow-x-auto pb-2 items-center custom-scrollbar">
+                {gameCategories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveGameFilter(cat)}
+                    className={`shrink-0 border-4 border-neo-border px-4 py-2 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150
+                      ${activeGameFilter === cat
+                        ? 'bg-yellow-300 text-neo-dark shadow-none translate-x-1 translate-y-1'
+                        : 'bg-neo-surface hover:-translate-y-1 shadow-[4px_4px_0px_0px_var(--color-neo-border)] hover:shadow-[6px_6px_0px_0px_var(--color-neo-border)]'
                       }`}
                   >
                     {cat}
@@ -157,28 +183,6 @@ function Home() {
             </div>
           )}
         </div>
-
-        {/* Filter Kategori Game */}
-        {gameCategories.length > 1 && (
-          <div className="flex flex-col gap-1 overflow-hidden w-full">
-            <span className="text-[10px] font-black opacity-50 block uppercase">Filter Kategori Game</span>
-            <div className="flex gap-2 overflow-x-auto pb-1 items-center">
-              {gameCategories.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveGameFilter(cat)}
-                  className={`shrink-0 border-4 border-neo-border px-3 py-1.5 md:px-5 md:py-1.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 h-10 md:h-12
-                    ${activeGameFilter === cat
-                      ? 'bg-yellow-300 text-neo-dark shadow-none translate-x-0.5 translate-y-0.5'
-                      : 'bg-neo-surface hover:-translate-y-1 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:shadow-[4px_4px_0px_0px_var(--color-neo-border)]'
-                    }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* ── GRID PRODUK ── */}
