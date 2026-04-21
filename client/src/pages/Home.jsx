@@ -7,6 +7,7 @@ import { Zap, CircleAlert, KeyRound, DollarSign, Lock, Clock, X, Play, Search, M
 function Home() {
   const [products, setProducts] = useState({});
   const [stock, setStock] = useState({});
+  const [categories, setCategories] = useState({});
   const [activeDevice, setActiveDevice] = useState('ALL');
   const [activeGame, setActiveGame] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -17,6 +18,7 @@ function Home() {
   useEffect(() => {
     onValue(ref(db, 'products'), (snapshot) => { setProducts(snapshot.val() || {}); });
     onValue(ref(db, 'stock'), (snapshot) => { setStock(snapshot.val() || {}); });
+    onValue(ref(db, 'settings/categories'), (snapshot) => { setCategories(snapshot.val() || {}); });
     setIsDark(document.documentElement.classList.contains('dark'));
   }, []);
 
@@ -32,15 +34,12 @@ function Home() {
     }
   };
 
-  const uniqueTags = Array.from(
-    new Set(Object.values(products).flatMap(p =>
-      p.tags ? p.tags.split(',').map(t => t.trim().toUpperCase()).filter(Boolean) : []
-    ))
-  );
+  const sortedCategories = Object.entries(categories)
+    .map(([id, cat], idx) => ({ id, ...cat, sortOrder: cat.order !== undefined ? cat.order : idx }))
+    .sort((a, b) => a.sortOrder - b.sortOrder);
 
-  const KNOWN_DEVICES = ['ANDROID', 'IOS', 'PC', 'WINDOWS', 'MAC'];
-  const deviceFilters = uniqueTags.filter(tag => KNOWN_DEVICES.includes(tag));
-  const gameFilters = uniqueTags.filter(tag => !KNOWN_DEVICES.includes(tag));
+  const deviceFilters = sortedCategories.filter(c => c.type === 'DEVICE').map(c => c.name.toUpperCase());
+  const gameFilters = sortedCategories.filter(c => c.type === 'GAME').map(c => c.name.toUpperCase());
 
   const filteredProducts = Object.entries(products)
     .filter(([, product]) => {
@@ -133,40 +132,54 @@ function Home() {
         </div>
 
         {/* Filter Device & Kategori (Games) */}
-        <div className="flex flex-col gap-2 w-full">
+        <div className="flex flex-col gap-4 w-full mt-2">
           {/* Device Filters */}
-          <div className="flex gap-2 overflow-x-auto pb-1 items-center">
-            <button onClick={() => setActiveDevice('ALL')}
-              className={`flex items-center gap-1 shrink-0 border-4 border-neo-border px-3 py-1.5 md:px-5 md:py-1.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 h-10 md:h-12
-                ${activeDevice === 'ALL' ? 'bg-neo-dark text-neo-surface shadow-none translate-x-0.5 translate-y-0.5' : 'bg-neo-surface hover:-translate-y-1 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:shadow-[4px_4px_0px_0px_var(--color-neo-border)]'}`}>
-              SEMUA DEVICE
-            </button>
-            {deviceFilters.map((cat) => {
-              const isAndroidIOS = cat === 'ANDROID' || cat === 'IOS';
-              return (
-              <button key={cat} onClick={() => setActiveDevice(cat)}
-                className={`flex items-center gap-1 shrink-0 border-4 border-neo-border px-3 py-1.5 md:px-5 md:py-1.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 h-10 md:h-12
-                  ${activeDevice === cat ? 'bg-neo-dark text-neo-surface shadow-none translate-x-0.5 translate-y-0.5' : 'bg-neo-surface hover:-translate-y-1 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:shadow-[4px_4px_0px_0px_var(--color-neo-border)]'}`}>
-                {isAndroidIOS ? <Smartphone size={16} className="text-neo-green" strokeWidth={3}/> : <Monitor className="text-neo-green" size={16} strokeWidth={3}/>} {cat}
+          <div className="flex flex-col gap-2">
+            <h3 className="font-black text-[10px] md:text-xs uppercase opacity-60 tracking-[0.2em] flex items-center gap-1.5 ml-1">
+              <Smartphone size={14}/> Pilih Platform
+            </h3>
+            <div className="flex gap-2 overflow-x-auto pb-2 items-center snap-x custom-scrollbar">
+              <button onClick={() => setActiveDevice('ALL')}
+                className={`flex items-center gap-1.5 shrink-0 border-4 border-neo-border px-4 py-2 md:px-5 md:py-2.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 snap-start
+                  ${activeDevice === 'ALL' ? 'bg-neo-dark text-neo-surface shadow-none translate-x-0.5 translate-y-0.5' : 'bg-neo-surface hover:-translate-y-1 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:shadow-[4px_4px_0px_0px_var(--color-neo-border)]'}`}>
+                SEMUA PLATFORM
               </button>
-              );
-            })}
+              {deviceFilters.map((cat) => {
+                const isAndroidIOS = cat === 'ANDROID' || cat === 'IOS';
+                const isActive = activeDevice === cat;
+                return (
+                <button key={cat} onClick={() => setActiveDevice(cat)}
+                  className={`flex items-center gap-1.5 shrink-0 border-4 border-neo-border px-4 py-2 md:px-5 md:py-2.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 snap-start
+                    ${isActive ? `${getBadgeColor(cat)} text-slate-900 border-neo-dark shadow-none translate-x-0.5 translate-y-0.5` : 'bg-neo-surface hover:-translate-y-1 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:shadow-[4px_4px_0px_0px_var(--color-neo-border)]'}`}>
+                  {isAndroidIOS ? <Smartphone size={16} strokeWidth={3}/> : <Monitor size={16} strokeWidth={3}/>} {cat}
+                </button>
+                );
+              })}
+            </div>
           </div>
           
           {/* Game Filters */}
-          <div className="flex gap-2 overflow-x-auto pb-1 items-center">
-            <button onClick={() => setActiveGame('ALL')}
-              className={`flex items-center gap-1 shrink-0 border-4 border-neo-border px-3 py-1.5 md:px-5 md:py-1.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 h-10 md:h-12
-                ${activeGame === 'ALL' ? 'bg-neo-dark text-neo-surface shadow-none translate-x-0.5 translate-y-0.5' : 'bg-neo-surface hover:-translate-y-1 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:shadow-[4px_4px_0px_0px_var(--color-neo-border)]'}`}>
-              SEMUA GAME
-            </button>
-            {gameFilters.map((cat) => (
-              <button key={cat} onClick={() => setActiveGame(cat)}
-                className={`flex items-center gap-1 shrink-0 border-4 border-neo-border px-3 py-1.5 md:px-5 md:py-1.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 h-10 md:h-12
-                  ${activeGame === cat ? 'bg-neo-dark text-neo-surface shadow-none translate-x-0.5 translate-y-0.5' : 'bg-neo-surface hover:-translate-y-1 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:shadow-[4px_4px_0px_0px_var(--color-neo-border)]'}`}>
-                <Gamepad2 size={16} className="text-yellow-300" strokeWidth={3}/> {cat}
+          <div className="flex flex-col gap-2">
+            <h3 className="font-black text-[10px] md:text-xs uppercase opacity-60 tracking-[0.2em] flex items-center gap-1.5 ml-1">
+              <Gamepad2 size={14}/> Pilih Game
+            </h3>
+            <div className="flex gap-2 overflow-x-auto pb-2 items-center snap-x custom-scrollbar">
+              <button onClick={() => setActiveGame('ALL')}
+                className={`flex items-center gap-1.5 shrink-0 border-4 border-neo-border px-4 py-2 md:px-5 md:py-2.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 snap-start
+                  ${activeGame === 'ALL' ? 'bg-neo-dark text-neo-surface shadow-none translate-x-0.5 translate-y-0.5' : 'bg-neo-surface hover:-translate-y-1 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:shadow-[4px_4px_0px_0px_var(--color-neo-border)]'}`}>
+                SEMUA GAME
               </button>
-            ))}
+              {gameFilters.map((cat) => {
+                const isActive = activeGame === cat;
+                return (
+                <button key={cat} onClick={() => setActiveGame(cat)}
+                  className={`flex items-center gap-1.5 shrink-0 border-4 border-neo-border px-4 py-2 md:px-5 md:py-2.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 snap-start
+                    ${isActive ? `${getBadgeColor(cat)} text-slate-900 border-neo-dark shadow-none translate-x-0.5 translate-y-0.5` : 'bg-neo-surface hover:-translate-y-1 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:bg-yellow-50 hover:shadow-[4px_4px_0px_0px_var(--color-neo-border)]'}`}>
+                  <Gamepad2 size={16} strokeWidth={3} className={isActive ? "text-slate-900" : "text-yellow-400"}/> {cat}
+                </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>

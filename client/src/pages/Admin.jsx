@@ -11,6 +11,8 @@ function Admin() {
   const [stock, setStock] = useState({});
   const [transactions, setTransactions] = useState({});
   const [trxFilter, setTrxFilter] = useState('ALL');
+  const [categories, setCategories] = useState({});
+  const [newCategory, setNewCategory] = useState({ name: '', type: 'DEVICE' });
   const [emailTemplate, setEmailTemplate] = useState('');
   const [announcement, setAnnouncement] = useState({
     enabled: false,
@@ -41,6 +43,7 @@ function Admin() {
       const data = snapshot.val();
       if (data) setAnnouncement(data);
     });
+    onValue(ref(db, 'settings/categories'), (snapshot) => { setCategories(snapshot.val() || {}); });
   }, []);
 
   const addProduct = async (e) => {
@@ -112,6 +115,23 @@ function Admin() {
     try {
       await axios.delete(`${backendUrl}/admin/products/${productId}/game_variants/${gameId}`, { headers: { 'x-admin-password': auth.password }});
     } catch (err) { alert(err.response?.data?.message || 'Gagal hapus game variant'); }
+  };
+
+  const addCategory = async (e) => {
+    e.preventDefault();
+    if (!newCategory.name) return;
+    try {
+      await axios.post(`${backendUrl}/admin/settings/categories`, newCategory, { headers: { 'x-admin-password': auth.password }});
+      setNewCategory({ name: '', type: 'DEVICE' });
+      alert('Kategori berhasil ditambahkan!');
+    } catch (err) { alert(err.response?.data?.message || 'Gagal tambah kategori'); }
+  };
+
+  const deleteCategory = async (categoryId, categoryName) => {
+    if (!confirm(`Hapus kategori "${categoryName}"?`)) return;
+    try {
+      await axios.delete(`${backendUrl}/admin/settings/categories/${categoryId}`, { headers: { 'x-admin-password': auth.password }});
+    } catch (err) { alert(err.response?.data?.message || 'Gagal hapus kategori'); }
   };
 
   const saveEditProduct = async () => {
@@ -196,7 +216,6 @@ function Admin() {
       newCurrentOrder = direction === 'UP' ? newTargetOrder - 1 : newTargetOrder + 1;
     }
 
-    const updates = {};
     if (type === 'PRODUCT') {
       updates[`products/${currentItem.id}/order`] = newCurrentOrder;
       updates[`products/${targetItem.id}/order`] = newTargetOrder;
@@ -206,6 +225,9 @@ function Admin() {
     } else if (type === 'GAME_VARIANT') {
       updates[`products/${parentId}/game_variants/${currentItem.id}/order`] = newCurrentOrder;
       updates[`products/${parentId}/game_variants/${targetItem.id}/order`] = newTargetOrder;
+    } else if (type === 'CATEGORY') {
+      updates[`settings/categories/${currentItem.id}/order`] = newCurrentOrder;
+      updates[`settings/categories/${targetItem.id}/order`] = newTargetOrder;
     }
 
     try {
@@ -220,7 +242,12 @@ function Admin() {
     .sort((a, b) => a.sortOrder - b.sortOrder);
 
 
-  const PRESET_TAGS = ['Android', 'iOS', 'PC', 'Windows', 'Mac', 'Free', 'Premium', 'VIP', 'No Root', 'Root'];
+  const sortedCategories = Object.entries(categories)
+    .map(([id, cat], idx) => ({ id, ...cat, sortOrder: cat.order !== undefined ? cat.order : idx }))
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+    
+  const deviceTags = sortedCategories.filter(c => c.type === 'DEVICE');
+  const gameTags = sortedCategories.filter(c => c.type === 'GAME');
 
   const toggleTag = (tag) => {
     const current = newProduct.tags ? newProduct.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
@@ -288,18 +315,32 @@ function Admin() {
             </div>
             <div className="flex flex-col gap-2">
               <label className="font-black uppercase text-sm flex items-center gap-2 bg-pink-200 border-2 border-neo-border w-fit px-3 py-1 shadow-[2px_2px_0_0_var(--color-neo-border)]">
-                <Tag size={14} strokeWidth={3}/> Tags Platform
+                <Tag size={14} strokeWidth={3}/> Tags Platform & Games
               </label>
+              
+              <p className="font-bold text-xs opacity-60 uppercase tracking-widest mt-1">Platform / Device</p>
               <div className="flex flex-wrap gap-2">
-                {PRESET_TAGS.map(tag => (
-                  <button key={tag} type="button" onClick={() => toggleTag(tag)}
+                {deviceTags.map(cat => (
+                  <button key={cat.id} type="button" onClick={() => toggleTag(cat.name)}
                     className={`border-2 border-neo-border px-3 py-1 text-xs font-black uppercase transition-all
-                      ${isTagActive(tag) ? 'bg-neo-dark text-neo-surface' : 'bg-neo-surface hover:bg-pink-100 shadow-[2px_2px_0_0_var(--color-neo-border)]'}`}>
-                    {tag}
+                      ${isTagActive(cat.name) ? 'bg-neo-dark text-neo-surface' : 'bg-neo-surface hover:bg-pink-100 shadow-[2px_2px_0_0_var(--color-neo-border)]'}`}>
+                    {cat.name}
                   </button>
                 ))}
               </div>
-              <input className="neo-input text-sm" placeholder="Atau ketik manual: Android, iOS, PC"
+              
+              <p className="font-bold text-xs opacity-60 uppercase tracking-widest mt-2">Games</p>
+              <div className="flex flex-wrap gap-2">
+                {gameTags.map(cat => (
+                  <button key={cat.id} type="button" onClick={() => toggleTag(cat.name)}
+                    className={`border-2 border-neo-border px-3 py-1 text-xs font-black uppercase transition-all
+                      ${isTagActive(cat.name) ? 'bg-neo-dark text-neo-surface' : 'bg-neo-surface hover:bg-yellow-100 shadow-[2px_2px_0_0_var(--color-neo-border)]'}`}>
+                    {cat.name}
+                  </button>
+                ))}
+              </div>
+
+              <input className="neo-input text-sm mt-2" placeholder="Atau ketik manual tag lain (Dipisahkan koma)"
                 value={newProduct.tags} onChange={e => setNewProduct({...newProduct, tags: e.target.value})}/>
             </div>
             <button className="neo-button-primary mt-2">SIMPAN PRODUK</button>
@@ -307,7 +348,7 @@ function Admin() {
         </section>
 
         {/* Tambah Variasi */}
-        <section className="neo-card flex flex-col gap-6 animate-fade-in-up">
+        <section className="neo-card flex flex-col gap-6 animate-fade-in-up md:col-span-1 lg:col-span-1">
           <h2 className="text-2xl font-black uppercase flex items-center gap-3 border-b-4 border-neo-border pb-4">
             <div className="bg-neo-green text-slate-900 border-4 border-neo-border p-2"><Package size={24} strokeWidth={3}/></div>
             Variasi (Bulan/Tahun)
@@ -375,6 +416,53 @@ function Admin() {
               )}
             </div>
           )}
+        </section>
+
+        {/* Kelola Kategori & Tag */}
+        <section className="neo-card flex flex-col gap-6 lg:col-span-2 animate-fade-in-up">
+          <h2 className="text-2xl font-black uppercase flex items-center gap-3 border-b-4 border-neo-border pb-4">
+            <div className="bg-pink-300 border-4 border-neo-border p-2"><Tag size={24} strokeWidth={3}/></div>
+            Kelola Kategori / Filter Tag
+          </h2>
+          <form onSubmit={addCategory} className="flex flex-col md:flex-row gap-3">
+            <select className="neo-input font-bold md:w-1/3" value={newCategory.type} onChange={e => setNewCategory({...newCategory, type: e.target.value})}>
+              <option value="DEVICE">Device / Platform</option>
+              <option value="GAME">Game</option>
+            </select>
+            <input className="neo-input flex-1" placeholder="Nama Kategori (Misal: Android, Free Fire)"
+              value={newCategory.name} onChange={e => setNewCategory({...newCategory, name: e.target.value})} required/>
+            <button className="neo-button-primary w-fit px-6 flex items-center gap-2"><Plus size={20} strokeWidth={3}/> Tambah</button>
+          </form>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t-4 border-neo-border pt-4">
+            {/* List Device */}
+            <div className="flex flex-col gap-2">
+              <h3 className="font-black text-sm uppercase opacity-50 bg-gray-100 px-3 py-1 border-2 border-neo-border mb-1">Device & Platform</h3>
+              {deviceTags.length === 0 && <p className="text-xs font-bold opacity-40 ml-1">Belum ada tags device</p>}
+              {deviceTags.map((cat, i) => (
+                <div key={cat.id} className="flex items-center gap-2 bg-neo-surface border-2 border-neo-border px-2 py-1.5 shadow-[2px_2px_0px_0px_var(--color-neo-border)] hover:bg-gray-50 transition-all">
+                  <button type="button" onClick={() => handleReorder('CATEGORY', null, deviceTags, i, 'UP')} className="hover:text-neo-green"><ChevronUp size={16} strokeWidth={3}/></button>
+                  <button type="button" onClick={() => handleReorder('CATEGORY', null, deviceTags, i, 'DOWN')} className="hover:text-neo-green"><ChevronDown size={16} strokeWidth={3}/></button>
+                  <span className="flex-1 font-black text-xs uppercase truncate leading-none">{cat.name}</span>
+                  <button type="button" onClick={() => deleteCategory(cat.id, cat.name)} className="bg-red-400 p-0.5 border-2 border-neo-border hover:bg-red-500 transition-all"><X size={12} strokeWidth={3}/></button>
+                </div>
+              ))}
+            </div>
+
+            {/* List Game */}
+            <div className="flex flex-col gap-2">
+              <h3 className="font-black text-sm uppercase opacity-50 bg-gray-100 px-3 py-1 border-2 border-neo-border mb-1">Games</h3>
+              {gameTags.length === 0 && <p className="text-xs font-bold opacity-40 ml-1">Belum ada tags game</p>}
+              {gameTags.map((cat, i) => (
+                <div key={cat.id} className="flex items-center gap-2 bg-neo-surface border-2 border-neo-border px-2 py-1.5 shadow-[2px_2px_0px_0px_var(--color-neo-border)] hover:bg-gray-50 transition-all">
+                  <button type="button" onClick={() => handleReorder('CATEGORY', null, gameTags, i, 'UP')} className="hover:text-neo-green"><ChevronUp size={16} strokeWidth={3}/></button>
+                  <button type="button" onClick={() => handleReorder('CATEGORY', null, gameTags, i, 'DOWN')} className="hover:text-neo-green"><ChevronDown size={16} strokeWidth={3}/></button>
+                  <span className="flex-1 font-black text-xs uppercase truncate leading-none">{cat.name}</span>
+                  <button type="button" onClick={() => deleteCategory(cat.id, cat.name)} className="bg-red-400 p-0.5 border-2 border-neo-border hover:bg-red-500 transition-all"><X size={12} strokeWidth={3}/></button>
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
 
         {/* Inject Stock */}
