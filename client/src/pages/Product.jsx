@@ -14,7 +14,7 @@ function Product() {
 
   useEffect(() => {
     onValue(ref(db, `products/${id}`), (snapshot) => { setProduct(snapshot.val()); });
-    onValue(ref(db, 'stock_counts'), (snapshot) => { setStock(snapshot.val() || {}); });
+    onValue(ref(db, 'stock'), (snapshot) => { setStock(snapshot.val() || {}); });
   }, [id]);
 
   useEffect(() => {
@@ -24,14 +24,20 @@ function Product() {
   }, [product]);
 
   const getStockCount = (subId) => {
-    return stock[subId] || 0;
+    if (!stock[subId]) return 0;
+    return Object.keys(stock[subId]).length;
   };
 
   if (product === null) return <div className="min-h-screen flex items-center justify-center font-black uppercase text-xl">Memuat...</div>;
   if (!product) return <div className="min-h-screen flex items-center justify-center font-black uppercase text-xl">Produk Tidak Ditemukan</div>;
 
   const tags = product.tags ? product.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
-  const gameVariants = product.game_variants ? Object.entries(product.game_variants) : [];
+  const gameVariants = product.game_variants 
+    ? Object.entries(product.game_variants)
+        .map(([gid, g], idx) => ({ id: gid, ...g, sortOrder: g.order !== undefined ? g.order : idx }))
+        .sort((a,b) => a.sortOrder - b.sortOrder)
+        .map(g => [g.id, g])
+    : [];
 
   const tagColors = {
     android: 'bg-green-300', ios: 'bg-sky-300', pc: 'bg-purple-300',
@@ -115,7 +121,11 @@ function Product() {
               Pilih Variasi:
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-2 gap-2">
-              {product.sub_products ? Object.entries(product.sub_products).map(([sid, sub]) => {
+              {product.sub_products ? Object.entries(product.sub_products)
+                .map(([sid, sub], idx) => ({ id: sid, ...sub, sortOrder: sub.order !== undefined ? sub.order : idx }))
+                .sort((a,b) => a.sortOrder - b.sortOrder)
+                .map((sub) => {
+                const sid = sub.id;
                 const count = getStockCount(sid);
                 const isAvailable = count > 0;
                 const isSelected = selectedSub === sid;

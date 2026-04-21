@@ -18,7 +18,7 @@ function Admin() {
     buttonText: '',
     buttonUrl: ''
   });
-  const [newProduct, setNewProduct] = useState({ name: '', desc: '', image: '', tags: '', feature_media: '', download_url: '' });
+  const [newProduct, setNewProduct] = useState({ name: '', desc: '', image: '', tags: '', feature_media: '' });
   const [newSub, setNewSub] = useState({ productId: '', label: '', price: '' });
   const [bulkStock, setBulkStock] = useState({ subId: '', keys: '' });
   const [auth, setAuth] = useState({ isAuthed: false, password: '' });
@@ -32,25 +32,10 @@ function Admin() {
 
   const backendUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
-  const fetchSecureData = async (pwd = auth.password) => {
-    try {
-      const tRes = await axios.get(`${backendUrl}/admin/transactions`, { headers: { 'x-admin-password': pwd }});
-      setTransactions(tRes.data.transactions || {});
-      const sRes = await axios.get(`${backendUrl}/admin/stock`, { headers: { 'x-admin-password': pwd }});
-      setStock(sRes.data.stock || {});
-    } catch (e) { console.error('Fetch error:', e); }
-  };
-
-  const syncStockCounts = async () => {
-    if(!confirm("Sinkronisasi semua angka stok dengan kunci asli? Gunakan jika hitungan Sisa Stok tidak akurat.")) return;
-    try {
-      await axios.post(`${backendUrl}/admin/sync_stock_counts`, {}, { headers: { 'x-admin-password': auth.password }});
-      alert('Berhasil disinkronisasi!');
-    } catch (e) { alert('Gagal: ' + e.message); }
-  };
-
   useEffect(() => {
     onValue(ref(db, 'products'), (snapshot) => { setProducts(snapshot.val() || {}); });
+    onValue(ref(db, 'stock'), (snapshot) => { setStock(snapshot.val() || {}); });
+    onValue(ref(db, 'transactions'), (snapshot) => { setTransactions(snapshot.val() || {}); });
     onValue(ref(db, 'settings/emailTemplate'), (snapshot) => { setEmailTemplate(snapshot.val() || ''); });
     onValue(ref(db, 'settings/announcement'), (snapshot) => {
       const data = snapshot.val();
@@ -62,7 +47,7 @@ function Admin() {
     e.preventDefault();
     try {
       await axios.post(`${backendUrl}/admin/products`, newProduct, { headers: { 'x-admin-password': auth.password }});
-      setNewProduct({ name: '', desc: '', image: '', tags: '', feature_media: '', download_url: '' });
+      setNewProduct({ name: '', desc: '', image: '', tags: '', feature_media: '' });
       alert('Produk berhasil ditambahkan!');
     } catch (err) { alert(err.response?.data?.message || 'Gagal tambah produk'); }
   };
@@ -97,7 +82,6 @@ function Admin() {
     try {
       await axios.post(`${backendUrl}/admin/stock/${bulkStock.subId}`, { keys: keysArray }, { headers: { 'x-admin-password': auth.password }});
       setBulkStock({ subId: '', keys: '' });
-      await fetchSecureData(auth.password);
       alert(`Sukses menambahkan ${keysArray.length} key!`);
     } catch (err) { alert(err.response?.data?.message || 'Gagal tambah stok'); }
   };
@@ -113,7 +97,6 @@ function Admin() {
     if (!confirm(`Hapus variasi "${label}"?`)) return;
     try {
       await axios.delete(`${backendUrl}/admin/products/${productId}/sub_products/${subId}`, { headers: { 'x-admin-password': auth.password }});
-      await fetchSecureData(auth.password);
     } catch (err) { alert(err.response?.data?.message || 'Gagal hapus variasi'); }
   };
 
@@ -121,7 +104,6 @@ function Admin() {
     if (!confirm(`Hapus key "${keyValue}"?`)) return;
     try {
       await axios.delete(`${backendUrl}/admin/stock/${subId}/${keyId}`, { headers: { 'x-admin-password': auth.password }});
-      await fetchSecureData(auth.password);
     } catch (err) { alert(err.response?.data?.message || 'Gagal hapus key'); }
   };
 
@@ -161,7 +143,6 @@ function Admin() {
         { headers: { 'x-admin-password': auth.password }}
       );
       setEditingKey(null);
-      await fetchSecureData(auth.password);
     } catch (err) { alert(err.response?.data?.message || 'Gagal update key'); }
   };
 
@@ -193,12 +174,51 @@ function Admin() {
       const res = await axios.post(`${backendUrl}/admin/login`, { password: auth.password });
       if (res.data.success) {
         setAuth({ ...auth, isAuthed: true });
-        await fetchSecureData(auth.password);
       }
     } catch (err) {
       alert(err.response?.data?.message || 'Password salah!');
     }
   };
+
+  const handleReorder = async (type, parentId, itemsArray, index, direction) => {
+    if ((direction === 'UP' && index === 0) || (direction === 'DOWN' && index === itemsArray.length - 1)) return;
+    
+    const targetIndex = direction === 'UP' ? index - 1 : index + 1;
+    const currentItem = itemsArray[index];
+    const targetItem = itemsArray[targetIndex];
+
+    const currentOrder = currentItem.order !== undefined ? currentItem.order : index;
+    const targetOrder = targetItem.order !== undefined ? targetItem.order : targetIndex;
+    
+    let newCurrentOrder = targetOrder;
+    let newTargetOrder = currentOrder;
+    if (newCurrentOrder === newTargetOrder) {
+      newCurrentOrder = direction === 'UP' ? newTargetOrder - 1 : newTargetOrder + 1;
+    }
+
+    const updates = {};
+    if (type === 'PRODUCT') {
+      updates[`products/${currentItem.id}/order`] = newCurrentOrder;
+      updates[`products/${targetItem.id}/order`] = newTargetOrder;
+    } else if (type === 'SUB_PRODUCT') {
+      updates[`products/${parentId}/sub_products/${currentItem.id}/order`] = newCurrentOrder;
+      updates[`products/${parentId}/sub_products/${targetItem.id}/order`] = newTargetOrder;
+    } else if (type === 'GAME_VARIANT') {
+      updates[`products/${parentId}/game_variants/${currentItem.id}/order`] = newCurrentOrder;
+      updates[`products/${parentId}/game_variants/${targetItem.id}/order`] = newTargetOrder;
+    }
+
+    try {
+      await axios.post(`${backendUrl}/admin/reorder`, { updates }, { headers: { 'x-admin-password': auth.password }});
+    } catch (err) {
+      alert(err.response?.data?.message || 'Gagal mengubah urutan');
+    }
+  };
+
+  const sortedProducts = Object.entries(products)
+    .map(([id, product], idx) => ({ id, ...product, sortOrder: product.order !== undefined ? product.order : idx }))
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+
 
   const PRESET_TAGS = ['Android', 'iOS', 'PC', 'Windows', 'Mac', 'Free', 'Premium', 'VIP', 'No Root', 'Root'];
 
@@ -236,19 +256,11 @@ function Admin() {
         <ArrowLeft size={20} strokeWidth={3} className="mr-2"/> Kembali
       </button>
 
-      <div className="neo-card bg-neo-green text-slate-900 mb-12 animate-fade-in-up flex flex-col items-center justify-center py-8 gap-4">
+      <div className="neo-card bg-neo-green text-slate-900 mb-12 animate-fade-in-up flex items-center justify-center py-8">
         <h1 className="text-4xl md:text-6xl font-black uppercase flex items-center gap-4 text-center">
           <LayoutDashboard size={48} strokeWidth={3} className="hidden md:block text-neo-dark"/>
           Control <span className="bg-neo-surface px-4 border-4 border-neo-border mx-2">Center</span>
         </h1>
-        <div className="flex gap-4">
-          <button onClick={() => fetchSecureData()} className="neo-button bg-neo-surface text-neo-dark border-4 border-neo-border shadow-neo py-2 px-4 hover:-translate-y-1 font-black text-sm">
-            ⟳ Segarkan Data
-          </button>
-          <button onClick={syncStockCounts} className="neo-button bg-pink-300 text-slate-900 border-4 border-neo-border shadow-neo py-2 px-4 hover:-translate-y-1 font-black text-sm">
-            ⚡ Sync Hitungan Stok
-          </button>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -273,14 +285,6 @@ function Admin() {
               <input className="neo-input text-sm" placeholder="URL gambar atau YouTube..."
                 value={newProduct.feature_media} onChange={e => setNewProduct({...newProduct, feature_media: e.target.value})}/>
               <p className="text-xs font-bold opacity-50">Tampil saat pembeli klik "SEE FEATURES"</p>
-            </div>
-            <div className="flex flex-col gap-2">
-              <label className="font-black uppercase text-sm flex items-center gap-2 bg-sky-300 text-slate-900 border-2 border-neo-border w-fit px-3 py-1 shadow-[2px_2px_0_0_var(--color-neo-border)]">
-                📥 URL Download Aplikasi (Opsional)
-              </label>
-              <input className="neo-input text-sm" placeholder="Link Mediafire, GDrive, Mega, dll..."
-                value={newProduct.download_url} onChange={e => setNewProduct({...newProduct, download_url: e.target.value})}/>
-              <p className="text-xs font-bold opacity-50">Muncul di detail pesanan pembeli setelah lunas (Laman Checkout).</p>
             </div>
             <div className="flex flex-col gap-2">
               <label className="font-black uppercase text-sm flex items-center gap-2 bg-pink-200 border-2 border-neo-border w-fit px-3 py-1 shadow-[2px_2px_0_0_var(--color-neo-border)]">
@@ -346,15 +350,25 @@ function Admin() {
                   <div key={pid}>
                     <p className="font-black text-sm uppercase mb-1">{p.name}</p>
                     <div className="flex flex-wrap gap-2">
-                      {Object.entries(p.game_variants).map(([gid, g]) => (
+                      {(() => {
+                        const sortedGames = Object.entries(p.game_variants)
+                          .map(([gid, g], idx) => ({ id: gid, ...g, sortOrder: g.order !== undefined ? g.order : idx }))
+                          .sort((a,b) => a.sortOrder - b.sortOrder);
+                        return sortedGames.map((g, gIndex) => {
+                          const gid = g.id;
+                          return (
                         <div key={gid} className="flex items-center gap-1 bg-yellow-100 border-2 border-neo-border px-3 py-1 shadow-[2px_2px_0_0_var(--color-neo-border)]">
+                          <button onClick={() => handleReorder('GAME_VARIANT', pid, sortedGames, gIndex, 'UP')} className="text-xs hover:text-neo-green"><ChevronUp size={12} strokeWidth={3}/></button>
+                          <button onClick={() => handleReorder('GAME_VARIANT', pid, sortedGames, gIndex, 'DOWN')} className="text-xs hover:text-neo-green"><ChevronDown size={12} strokeWidth={3}/></button>
                           <span className="font-black text-xs uppercase">{g.name}</span>
                           {g.note && <span className="text-xs opacity-50 ml-1">({g.note})</span>}
                           <button onClick={() => deleteGameVariant(pid, gid, g.name)} className="ml-2 bg-red-400 border-2 border-neo-border p-0.5">
                             <X size={10} strokeWidth={3}/>
                           </button>
                         </div>
-                      ))}
+                          );
+                        });
+                      })()}
                     </div>
                   </div>
                 ) : null
@@ -442,7 +456,10 @@ function Admin() {
           {Object.keys(products).length === 0 && <p className="font-bold opacity-50 text-center py-4">Belum ada produk.</p>}
 
           <div className="flex flex-col gap-4">
-            {Object.entries(products).map(([pid, product]) => (
+            {sortedProducts.map((productWrapper, pIndex) => {
+              const pid = productWrapper.id;
+              const product = productWrapper;
+              return (
               <div key={pid} className="border-4 border-neo-border shadow-[4px_4px_0px_0px_var(--color-neo-border)]">
 
                 {/* Header Produk */}
@@ -454,10 +471,12 @@ function Admin() {
                     <span className="text-xs font-bold opacity-40 shrink-0 normal-case">({Object.keys(product.sub_products || {}).length} var)</span>
                   </button>
                   <div className="flex gap-2 shrink-0">
+                    <button onClick={() => handleReorder('PRODUCT', null, sortedProducts, pIndex, 'UP')} className="bg-neo-surface border-4 border-neo-border p-1.5 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:-translate-y-1 transition-all"><ChevronUp size={15} strokeWidth={3}/></button>
+                    <button onClick={() => handleReorder('PRODUCT', null, sortedProducts, pIndex, 'DOWN')} className="bg-neo-surface border-4 border-neo-border p-1.5 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:-translate-y-1 transition-all"><ChevronDown size={15} strokeWidth={3}/></button>
                     <button
                       onClick={() => setEditingProduct({
                         id: pid,
-                        data: { name: product.name, desc: product.desc || '', image: product.image || '', tags: product.tags || '', feature_media: product.feature_media || '', download_url: product.download_url || '' }
+                        data: { name: product.name, desc: product.desc || '', image: product.image || '', tags: product.tags || '', feature_media: product.feature_media || '' }
                       })}
                       className="bg-yellow-300 border-4 border-neo-border p-1.5 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:-translate-y-1 transition-all">
                       <Pencil size={15} strokeWidth={3}/>
@@ -483,8 +502,6 @@ function Admin() {
                       onChange={e => setEditingProduct({...editingProduct, data: {...editingProduct.data, feature_media: e.target.value}})}/>
                     <input className="neo-input text-sm" placeholder="Tags (Android, iOS, PC...)" value={editingProduct.data.tags}
                       onChange={e => setEditingProduct({...editingProduct, data: {...editingProduct.data, tags: e.target.value}})}/>
-                    <input className="neo-input text-sm" placeholder="URL Download Aplikasi (Link Mediafire, dll)" value={editingProduct.data.download_url}
-                      onChange={e => setEditingProduct({...editingProduct, data: {...editingProduct.data, download_url: e.target.value}})}/>
                     <div className="flex gap-2">
                       <button onClick={saveEditProduct} className="neo-button-primary flex-1 text-sm py-2 flex items-center justify-center gap-1"><Save size={14}/> Simpan</button>
                       <button onClick={() => setEditingProduct(null)} className="neo-button flex-1 text-sm py-2 flex items-center justify-center gap-1"><X size={14}/> Batal</button>
@@ -495,7 +512,12 @@ function Admin() {
                 {/* Variasi */}
                 {expandedProduct === pid && product.sub_products && (
                   <div className="border-t-4 border-neo-border bg-gray-50">
-                    {Object.entries(product.sub_products).map(([sid, sub]) => {
+                    {(() => {
+                      const sortedSubs = Object.entries(product.sub_products)
+                        .map(([sid, sub], idx) => ({ id: sid, ...sub, sortOrder: sub.order !== undefined ? sub.order : idx }))
+                        .sort((a,b) => a.sortOrder - b.sortOrder);
+                      return sortedSubs.map((sub, sIndex) => {
+                        const sid = sub.id;
                       const subStockKeys = stock[sid] ? Object.entries(stock[sid]) : [];
                       return (
                         <div key={sid} className="border-b-4 border-neo-border last:border-b-0">
@@ -510,6 +532,8 @@ function Admin() {
                               <span className="text-xs opacity-40 shrink-0">— {subStockKeys.length} key</span>
                             </button>
                             <div className="flex gap-1.5 shrink-0">
+                              <button onClick={() => handleReorder('SUB_PRODUCT', pid, sortedSubs, sIndex, 'UP')} className="bg-neo-surface border-4 border-neo-border p-1 shadow-[2px_2px_0px_0px_var(--color-neo-border)] hover:-translate-y-0.5 transition-all"><ChevronUp size={13} strokeWidth={3}/></button>
+                              <button onClick={() => handleReorder('SUB_PRODUCT', pid, sortedSubs, sIndex, 'DOWN')} className="bg-neo-surface border-4 border-neo-border p-1 shadow-[2px_2px_0px_0px_var(--color-neo-border)] hover:-translate-y-0.5 transition-all"><ChevronDown size={13} strokeWidth={3}/></button>
                               <button onClick={() => setEditingSub({ pid, sid, data: { label: sub.label, price: String(sub.price) }})}
                                 className="bg-yellow-300 border-4 border-neo-border p-1 shadow-[2px_2px_0px_0px_var(--color-neo-border)] hover:-translate-y-0.5 transition-all">
                                 <Pencil size={13} strokeWidth={3}/>
@@ -581,11 +605,13 @@ function Admin() {
                           )}
                         </div>
                       );
-                    })}
+                    });
+                  })()}
                   </div>
                 )}
               </div>
-            ))}
+            );
+            })}
           </div>
         </section>
 

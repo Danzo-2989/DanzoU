@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebase';
 import { ref, onValue } from 'firebase/database';
 import { useNavigate } from 'react-router-dom';
-import { Zap, CircleAlert, KeyRound, DollarSign, Lock, Clock, X, Play, Search, Moon, Sun } from 'lucide-react';
+import { Zap, CircleAlert, KeyRound, DollarSign, Lock, Clock, X, Play, Search, Moon, Sun, Smartphone, Monitor, Gamepad2 } from 'lucide-react';
 
 function Home() {
   const [products, setProducts] = useState({});
   const [stock, setStock] = useState({});
-  const [activeFilter, setActiveFilter] = useState('ALL');
+  const [activeDevice, setActiveDevice] = useState('ALL');
+  const [activeGame, setActiveGame] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [previewProduct, setPreviewProduct] = useState(null); // { name, mediaUrl, mediaType }
   const [isDark, setIsDark] = useState(false);
@@ -31,21 +32,32 @@ function Home() {
     }
   };
 
-  const allCategories = ['ALL', ...Array.from(
+  const uniqueTags = Array.from(
     new Set(Object.values(products).flatMap(p =>
       p.tags ? p.tags.split(',').map(t => t.trim().toUpperCase()).filter(Boolean) : []
     ))
-  )];
+  );
 
-  const filteredProducts = Object.entries(products).filter(([, product]) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          (product.desc && product.desc.toLowerCase().includes(searchQuery.toLowerCase()));
-    if (!matchesSearch) return false;
+  const KNOWN_DEVICES = ['ANDROID', 'IOS', 'PC', 'WINDOWS', 'MAC'];
+  const deviceFilters = uniqueTags.filter(tag => KNOWN_DEVICES.includes(tag));
+  const gameFilters = uniqueTags.filter(tag => !KNOWN_DEVICES.includes(tag));
 
-    if (activeFilter === 'ALL') return true;
-    if (!product.tags) return false;
-    return product.tags.split(',').map(t => t.trim().toUpperCase()).includes(activeFilter);
-  });
+  const filteredProducts = Object.entries(products)
+    .filter(([, product]) => {
+      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            (product.desc && product.desc.toLowerCase().includes(searchQuery.toLowerCase()));
+      if (!matchesSearch) return false;
+
+      const pTags = product.tags ? product.tags.split(',').map(t => t.trim().toUpperCase()) : [];
+      
+      const matchDevice = activeDevice === 'ALL' || pTags.includes(activeDevice);
+      const matchGame = activeGame === 'ALL' || pTags.includes(activeGame);
+      
+      return matchDevice && matchGame;
+    })
+    .map(([id, product], idx) => ({ id, ...product, sortOrder: product.order !== undefined ? product.order : idx }))
+    .sort((a,b) => a.sortOrder - b.sortOrder)
+    .map(product => [product.id, product]);
 
   const tagColorMap = {
     ANDROID: 'bg-green-400', IOS: 'bg-sky-400', PC: 'bg-purple-400',
@@ -105,9 +117,9 @@ function Home() {
       </header>
 
       {/* ── PENCARIAN & FILTER KATEGORI ── */}
-      <div className="flex flex-col md:flex-row gap-3 animate-fade-in-up">
+      <div className="flex flex-col gap-3 animate-fade-in-up">
         {/* Kolom Pencarian */}
-        <div className="flex bg-neo-surface border-4 border-neo-border shadow-[3px_3px_0px_0px_var(--color-neo-border)] flex-1 max-w-sm focus-within:-translate-y-1 focus-within:shadow-[4px_4px_0_0_var(--color-neo-border)] transition-all h-10 md:h-12">
+        <div className="flex bg-neo-surface border-4 border-neo-border shadow-[3px_3px_0px_0px_var(--color-neo-border)] flex-1 focus-within:-translate-y-1 focus-within:shadow-[4px_4px_0_0_var(--color-neo-border)] transition-all h-10 md:h-12">
           <div className="bg-neo-green text-slate-900 px-3 border-r-4 border-neo-border flex items-center justify-center ">
             <Search size={18} strokeWidth={3}/>
           </div>
@@ -120,24 +132,43 @@ function Home() {
           )}
         </div>
 
-        {/* Filter Kategori */}
-        {allCategories.length > 1 && (
-          <div className="flex gap-2 overflow-x-auto pb-1 flex-1 items-center">
-            {allCategories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveFilter(cat)}
-                className={`shrink-0 border-4 border-neo-border px-3 py-1.5 md:px-5 md:py-1.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 h-10 md:h-12
-                  ${activeFilter === cat
-                    ? 'bg-neo-dark text-neo-surface shadow-none translate-x-0.5 translate-y-0.5'
-                    : 'bg-neo-surface hover:-translate-y-1 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:shadow-[4px_4px_0px_0px_var(--color-neo-border)]'
-                  }`}
-              >
-                {cat}
+        {/* Filter Device & Kategori (Games) */}
+        <div className="flex flex-col gap-2 w-full">
+          {/* Device Filters */}
+          <div className="flex gap-2 overflow-x-auto pb-1 items-center">
+            <button onClick={() => setActiveDevice('ALL')}
+              className={`flex items-center gap-1 shrink-0 border-4 border-neo-border px-3 py-1.5 md:px-5 md:py-1.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 h-10 md:h-12
+                ${activeDevice === 'ALL' ? 'bg-neo-dark text-neo-surface shadow-none translate-x-0.5 translate-y-0.5' : 'bg-neo-surface hover:-translate-y-1 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:shadow-[4px_4px_0px_0px_var(--color-neo-border)]'}`}>
+              SEMUA DEVICE
+            </button>
+            {deviceFilters.map((cat) => {
+              const isAndroidIOS = cat === 'ANDROID' || cat === 'IOS';
+              return (
+              <button key={cat} onClick={() => setActiveDevice(cat)}
+                className={`flex items-center gap-1 shrink-0 border-4 border-neo-border px-3 py-1.5 md:px-5 md:py-1.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 h-10 md:h-12
+                  ${activeDevice === cat ? 'bg-neo-dark text-neo-surface shadow-none translate-x-0.5 translate-y-0.5' : 'bg-neo-surface hover:-translate-y-1 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:shadow-[4px_4px_0px_0px_var(--color-neo-border)]'}`}>
+                {isAndroidIOS ? <Smartphone size={16} className="text-neo-green" strokeWidth={3}/> : <Monitor className="text-neo-green" size={16} strokeWidth={3}/>} {cat}
+              </button>
+              );
+            })}
+          </div>
+          
+          {/* Game Filters */}
+          <div className="flex gap-2 overflow-x-auto pb-1 items-center">
+            <button onClick={() => setActiveGame('ALL')}
+              className={`flex items-center gap-1 shrink-0 border-4 border-neo-border px-3 py-1.5 md:px-5 md:py-1.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 h-10 md:h-12
+                ${activeGame === 'ALL' ? 'bg-neo-dark text-neo-surface shadow-none translate-x-0.5 translate-y-0.5' : 'bg-neo-surface hover:-translate-y-1 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:shadow-[4px_4px_0px_0px_var(--color-neo-border)]'}`}>
+              SEMUA GAME
+            </button>
+            {gameFilters.map((cat) => (
+              <button key={cat} onClick={() => setActiveGame(cat)}
+                className={`flex items-center gap-1 shrink-0 border-4 border-neo-border px-3 py-1.5 md:px-5 md:py-1.5 font-black uppercase text-xs md:text-sm tracking-wider transition-all duration-150 h-10 md:h-12
+                  ${activeGame === cat ? 'bg-neo-dark text-neo-surface shadow-none translate-x-0.5 translate-y-0.5' : 'bg-neo-surface hover:-translate-y-1 shadow-[3px_3px_0px_0px_var(--color-neo-border)] hover:shadow-[4px_4px_0px_0px_var(--color-neo-border)]'}`}>
+                <Gamepad2 size={16} className="text-yellow-300" strokeWidth={3}/> {cat}
               </button>
             ))}
           </div>
-        )}
+        </div>
       </div>
 
       {/* ── GRID PRODUK ── */}
@@ -215,10 +246,10 @@ function Home() {
             <CircleAlert size={32} strokeWidth={2.5} />
           </div>
           <h2 className="text-2xl font-black uppercase mb-2">
-            {activeFilter === 'ALL' ? 'Wow, Kosong!' : `Tidak ada "${activeFilter}"`}
+            {(activeDevice === 'ALL' && activeGame === 'ALL') ? 'Wow, Kosong!' : 'Tidak ditemukan.'}
           </h2>
           <p className="font-bold opacity-75 text-sm">
-            {activeFilter === 'ALL' ? 'Belum ada produk.' : 'Coba kategori lain.'}
+            {(activeDevice === 'ALL' && activeGame === 'ALL') ? 'Belum ada produk.' : 'Coba hapus filter atau cari yang lain.'}
           </p>
         </div>
       )}
