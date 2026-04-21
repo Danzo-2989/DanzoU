@@ -142,22 +142,24 @@ function Admin() {
   };
 
   const moveProduct = async (index, direction) => {
-    const sortedProducts = Object.entries(products).sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+    const list = Object.entries(products)
+      .sort((a, b) => (a[1].order || 0) - (b[1].order || 0))
+      .map(([pid, p], i) => ({ id: pid, order: i }));
+
     if (direction === 'up' && index > 0) {
-      const temp = sortedProducts[index][1].order;
-      sortedProducts[index][1].order = sortedProducts[index - 1][1].order;
-      sortedProducts[index - 1][1].order = temp;
-    } else if (direction === 'down' && index < sortedProducts.length - 1) {
-      const temp = sortedProducts[index][1].order;
-      sortedProducts[index][1].order = sortedProducts[index + 1][1].order;
-      sortedProducts[index + 1][1].order = temp;
+      const temp = list[index].order;
+      list[index].order = list[index - 1].order;
+      list[index - 1].order = temp;
+    } else if (direction === 'down' && index < list.length - 1) {
+      const temp = list[index].order;
+      list[index].order = list[index + 1].order;
+      list[index + 1].order = temp;
     } else {
       return;
     }
 
-    const updates = sortedProducts.map(([pid, p]) => ({ id: pid, order: p.order }));
     try {
-      await axios.post(`${backendUrl}/admin/products/reorder`, { updates }, { headers: { 'x-admin-password': auth.password }});
+      await axios.post(`${backendUrl}/admin/products/reorder`, { updates: list }, { headers: { 'x-admin-password': auth.password }});
     } catch (err) {
       alert(err.response?.data?.message || 'Gagal mengubah urutan');
     }
